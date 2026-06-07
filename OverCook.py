@@ -1,6 +1,7 @@
 import pygame
 import sys
 import math
+from Clases import (Chef, Cocina,EstacionDespensa, EstacionEntrega, Estacion,Proteina, VegetalesYFrutas, PanesYBases)
 pygame.init()
 pygame.font.init()
 import Constantes
@@ -13,18 +14,64 @@ pygame.display.set_caption("Over Cook Tec")
 fondo1 = pygame.image.load("fondo1.png")
 fondo1 = pygame.transform.scale(fondo1, (ANCHO, ALTO))
 
+clock = pygame.time.Clock()
+
+
 def pantalla_nivel_1():
-    fondo = pygame.Surface((ANCHO, ALTO))
-    fondo.fill(Constantes.BLANCO)
-    while True:
-        ventana.blit(fondo, (0, 0))
-        for evento in pygame.event.get():
-            if evento.type == pygame.QUIT:
+    
+    
+    x1 = 100
+    y1 = 100
+
+    x2 = 100
+    y2 = 100
+    gato1=pygame.image.load("gato.png")
+    gato1=pygame.transform.scale(gato1,(x1,y1))
+
+    gato2=pygame.image.load("gato2.png")
+    gato2=pygame.transform.scale(gato2,(x2,y2))
+    vel = 1
+
+    run = True
+    while run:
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            if evento.type == pygame.KEYDOWN and evento.key == pygame.K_ESCAPE:
-                return  # volver a pantalla de niveles
 
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                return
+
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_a]:
+            x1 -= vel
+
+        if keys[pygame.K_d]:
+            x1 += vel
+
+        if keys[pygame.K_w]:
+            y1 -= vel
+
+        if keys[pygame.K_s]:
+            y1 += vel
+
+
+        if keys[pygame.K_LEFT] and x2 > 0:
+            x2 -= vel
+
+        if keys[pygame.K_RIGHT] and x2 < ANCHO - 1:
+            x2 += vel
+
+        if keys[pygame.K_UP] and y2 > 0:
+            y2 -= vel
+
+        if keys[pygame.K_DOWN] and y2 < ALTO - 1:
+            y2 += vel
+
+        ventana.fill((0, 0, 0))
+        ventana.blit(gato1, (x1, y1))
+        ventana.blit(gato2, (x2, y2))
         pygame.display.update()
 
 
@@ -46,6 +93,9 @@ def pantalla_nivel_3():
     fondo = pygame.Surface((ANCHO, ALTO))
     fondo.fill(Constantes.BLANCO)
     while True:
+
+
+        
         ventana.blit(fondo, (0, 0))
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
