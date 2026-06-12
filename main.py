@@ -17,8 +17,8 @@ from Clases import (
 )
 
 
-ANCHO = 1100
-ALTO  = 800
+ANCHO = 1200
+ALTO  = 750
 Constantes.fuente_basica = pygame.font.SysFont("impact", 20)
 Constantes.fuente_bonita = pygame.font.SysFont("Mocha Choco", 36, bold=True)
 Constantes.fuente_bonita_grande = pygame.font.SysFont("Mocha Choco", 50)
@@ -42,16 +42,16 @@ for x in range(63):
     tile_list.append(tile_image)
 
 world_data = [
-    [0,0,8,0,0,40,0,0],
-    [0,1,2,0,2,1,2,6],
-    [0,2,1,32,1,2,1,0],
+    [0,0,9,0,0,5,0,0],
+    [45,1,2,0,2,1,2,6],
+    [0,2,1,36,1,2,1,0],
     [3,1,2,1,2,0,2,0],
-    [0,4,0,0,16,0,24,0],
+    [0,0,4,0,18,0,27,0],
 
 ]
 
 world = Mundo()
-world.process_data(world_data, tile_list)
+world.process_data(world_data, tile_list, "nivel1")
 for tile in world.map_tiles:
     print(tile[1].x, tile[1].y) 
 
@@ -75,7 +75,7 @@ def pantalla_nivel_1():
         nombre="Chef 1",
         imagen_path="gato.png",
         x=200, y=300,
-        teclas=(pygame.K_w, pygame.K_s, pygame.K_a, pygame.K_d),
+        teclas=(pygame.K_w, pygame.K_s, pygame.K_a, pygame.K_d, pygame.K_e),
         velocidad=3
     )
 
@@ -83,7 +83,7 @@ def pantalla_nivel_1():
         nombre="Chef 2",
         imagen_path="gato2.png",
         x=400, y=300,
-        teclas=(pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT),
+        teclas=(pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT, pygame.K_KP0),
         velocidad=3
     )
 
@@ -108,11 +108,42 @@ def pantalla_nivel_1():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     return
+                
+                for chef in cocina.chefs:
+                    if event.key == chef.teclas[4]:
+                        tipo = chef.agarrar(world.estaciones_tiles)
+                        print(f"{chef.nombre} presionó E → tipo: {tipo}")  # ← agrega esto
+                        print(f"Chef pos: {chef.x}, {chef.y}")
+                        print(f"Estaciones: {[(e['tipo'], e['rect'].x, e['rect'].y) for e in world.estaciones_tiles]}")
+
+                        if chef.ingrediente_mano is None:
+                            if tipo == "estacion_carne":
+                                chef.ingrediente_mano = Proteina("Carne")
+                            elif tipo == "estacion_pan":    
+                                chef.ingrediente_mano = PanesYBases("Pan")
+                            elif tipo == "estacion_tomates":    
+                                chef.ingrediente_mano = VegetalesYFrutas("Tomate")
+                            elif tipo == "estacion_papas":      
+                                chef.ingrediente_mano = VegetalesYFrutas("Papa")
+
+                        elif chef.ingrediente_mano is not None:
+                            if tipo == "cocina":
+                                if isinstance(chef.ingrediente_mano, Proteina):
+                                    chef.esta_procesando = True
+                            elif tipo == "freidor":
+                                if isinstance(chef.ingrediente_mano, (Proteina, VegetalesYFrutas)):
+                                    chef.esta_procesando = True
+                            elif tipo == "tabla_picar":
+                                if isinstance(chef.ingrediente_mano, VegetalesYFrutas):
+                                    chef.esta_procesando = True
+                            elif tipo == "entrega":
+                                chef.ingrediente_mano = None
+
 
         # ── Movimiento: ambos chefs se mueven a la vez ──
         keys = pygame.key.get_pressed()
         for chef in cocina.chefs:
-            chef.mover(keys, ANCHO, ALTO)
+            chef.mover(keys, ANCHO, ALTO, world.obstaculos_tiles)
 
         # ── Actualizar lógica ─────────────────
         cocina.actualizar(delta)

@@ -168,24 +168,74 @@ class Chef:
 
         # teclas es una tupla: (arriba, abajo, izquierda, derecha)
         self.teclas = teclas
+        self.ingrediente_mano = None
 
         self.imagen = pygame.image.load(imagen_path)
         self.imagen = pygame.transform.scale(self.imagen, (80, 80))
 
-    def mover(self, keys, ancho_ventana, alto_ventana):
-        arriba, abajo, izquierda, derecha = self.teclas
+        #Tiles de ingredientes
+        self.ingredientes_tiles = {
+            "Carne":  pygame.transform.scale(pygame.image.load("tileset/tile13.png"), (40, 40)),
+            "Papa":   pygame.transform.scale(pygame.image.load("tileset/tile15.png"),  (40, 40)),
+            "Tomate": pygame.transform.scale(pygame.image.load("tileset/tile21.png"),  (40, 40)),
+            "Pan":    pygame.transform.scale(pygame.image.load("tileset/tile20.png"), (40, 40)),
+        }
 
-        if keys[izquierda] and self.x > 0:
-            self.x -= self.velocidad
-        if keys[derecha] and self.x < ancho_ventana - 80:
-            self.x += self.velocidad
-        if keys[arriba] and self.y > 0:
-            self.y -= self.velocidad
-        if keys[abajo] and self.y < alto_ventana - 80:
-            self.y += self.velocidad
+    def mover(self, keys, ancho_ventana, alto_ventana, obstaculos_tiles):
+        arriba, abajo, izquierda, derecha, accion = self.teclas
+
+        chef_rect = pygame.Rect(self.x, self.y, 80, 80)
+
+        #Movimiento horizontal
+        dx = 0
+        if keys[izquierda]:
+            dx -= self.velocidad
+        if keys[derecha]:
+            dx += self.velocidad
+        chef_rect.x += dx
+        for obstaculo in obstaculos_tiles:
+            if chef_rect.colliderect(obstaculo):
+                if dx > 0:  # moviéndose a la derecha
+                    chef_rect.right = obstaculo.left
+                if dx < 0:  # moviéndose a la izquierda
+                    chef_rect.left = obstaculo.right
+
+        dy = 0
+        if keys[arriba]:
+            dy -= self.velocidad
+        if keys[abajo]:
+            dy += self.velocidad
+        chef_rect.y += dy
+
+        for obstaculo in obstaculos_tiles:
+            if chef_rect.colliderect(obstaculo):
+                if dy > 0:  # moviéndose hacia abajo
+                    chef_rect.bottom = obstaculo.top
+                if dy < 0:  # moviéndose hacia arriba
+                    chef_rect.top = obstaculo.bottom
+        
+
+        self.x = chef_rect.x
+        self.y = chef_rect.y
+
+    def agarrar(self, estaciones_tiles):
+        arriba, abajo, izquierda, derecha, accion = self.teclas
+        chef_rect = pygame.Rect(self.x -10, self.y -10, 100, 100)
+
+        for estacion in estaciones_tiles:
+            if chef_rect.colliderect(estacion["rect"]):
+                return estacion["tipo"]  # devuelve qué estación tocó
+        return None
 
     def dibujar(self, ventana):
         ventana.blit(self.imagen, (self.x, self.y))
+
+        if self.ingrediente_mano:
+            nombre = self.ingrediente_mano.nombre
+            print(f"Dibujando ingrediente: '{nombre}', en tiles: {list(self.ingredientes_tiles.keys())}")
+            if nombre in self.ingredientes_tiles:
+                img = self.ingredientes_tiles[nombre]
+                ventana.blit(img, (self.x + 40, self.y - 10))
 
     def __str__(self):
         return f"Chef: {self.nombre} | Pts: {self.puntos}"

@@ -11,7 +11,7 @@ NARANJA = (255, 165, 0)
 MORADO = (128, 0, 128)
 ROSA = (255, 105, 180)
 NEGRO = (0,0,0)
-TILE_SIZE = 60
+TILE_SIZE = 150
 
 # Fuentes
 fuente_basica = None
