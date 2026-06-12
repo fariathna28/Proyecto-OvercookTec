@@ -11,9 +11,11 @@ NARANJA = (255, 165, 0)
 MORADO = (128, 0, 128)
 ROSA = (255, 105, 180)
 NEGRO = (0,0,0)
+TILE_SIZE = 60
 
 # Fuentes
-fuente_basica = pygame.font.SysFont("impact", 20)
-fuente_bonita = pygame.font.SysFont("Mocha Choco", 36, bold=True)
-fuente_bonita_grande = pygame.font.SysFont("Mocha Choco", 50)
-fuente_bonita_pequeña = pygame.font.SysFont("Mocha Choco", 28)
+fuente_basica = None
+fuente_bonita = None
+fuente_bonita_grande = None
+fuente_bonita_pequeña = None
+

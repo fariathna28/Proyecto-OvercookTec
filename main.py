@@ -1,17 +1,28 @@
 import pygame
 import sys
+
+
+
+
+
+pygame.init()
+pygame.font.init()
+import Constantes
+
+from mundo import Mundo
 from Clases import (
     Chef, Cocina,
     EstacionDespensa, EstacionEntrega, Estacion,
     Proteina, VegetalesYFrutas, PanesYBases
 )
-from mundo import Mundo
 
-pygame.init()
-pygame.font.init()
-import Constantes
+
 ANCHO = 1100
 ALTO  = 800
+Constantes.fuente_basica = pygame.font.SysFont("impact", 20)
+Constantes.fuente_bonita = pygame.font.SysFont("Mocha Choco", 36, bold=True)
+Constantes.fuente_bonita_grande = pygame.font.SysFont("Mocha Choco", 50)
+Constantes.fuente_bonita_pequeña = pygame.font.SysFont("Mocha Choco", 28)
 
 ventana = pygame.display.set_mode((ANCHO, ALTO))
 pygame.display.set_caption("Over Cook Tec")
@@ -25,22 +36,30 @@ clock = pygame.time.Clock()
 Video de 6 horas
 """
 tile_list = []
-for x in range(125):
-    tile_image = pygame.image.load(f"/tileset/tile{x+1}.png")
-    tile_image = pygame.transform.scale(tile_image, 60)
+for x in range(63):
+    tile_image = pygame.image.load(f"tileset/tile{x+1}.png")
+    tile_image = pygame.transform.scale(tile_image, size=(Constantes.TILE_SIZE, Constantes.TILE_SIZE))
     tile_list.append(tile_image)
 
 world_data = [
-    [1,1,1,1,1,1,1]
+    [0,0,8,0,0,40,0,0],
+    [0,1,2,0,2,1,2,6],
+    [0,2,1,32,1,2,1,0],
+    [3,1,2,1,2,0,2,0],
+    [0,4,0,0,16,0,24,0],
 
 ]
+
 world = Mundo()
-world.process_data(world_data, )
+world.process_data(world_data, tile_list)
+for tile in world.map_tiles:
+    print(tile[1].x, tile[1].y) 
+
 
 def dibujar_grid():
     for x in range (30):
-        pygame.draw.line(ventana, Constantes.BLANCO, start_pos=(x*60, 0), end_pos=(x*60, ALTO))
-        pygame.draw.line(ventana, Constantes.BLANCO, start_pos=(0, x*60), end_pos=(ANCHO, x*60))
+        pygame.draw.line(ventana, Constantes.BLANCO, start_pos=(x*Constantes.TILE_SIZE, 0), end_pos=(x*Constantes.TILE_SIZE, ALTO))
+        pygame.draw.line(ventana, Constantes.BLANCO, start_pos=(0, x*Constantes.TILE_SIZE), end_pos=(ANCHO, x*Constantes.TILE_SIZE))
 
 # ─────────────────────────────────────────────
 #  NIVEL 1  –  usa las clases Chef y Cocina
@@ -104,9 +123,11 @@ def pantalla_nivel_1():
 
         # ── Dibujar ───────────────────────────
         ventana.fill((30, 30, 30))
-        cocina.dibujar(ventana)
-        world.draw(ventana)
         dibujar_grid()
+        world.draw(ventana)
+        cocina.dibujar(ventana)
+        
+        
 
         # HUD: tiempo y puntos
         tiempo_txt = fuente.render(f"Tiempo: {max(0, int(cocina.tiempo))}s", True, (255, 255, 255))
