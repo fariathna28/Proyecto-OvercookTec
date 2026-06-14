@@ -87,7 +87,10 @@ class Plato:
     def agregar(self, ingrediente):
         if self.puede_agregar(ingrediente):
             self.ingredientes.append(ingrediente)
+            print(f"Plato tiene: {[i.nombre for i in self.ingredientes]}")
             return True
+        else:
+            print(f"No se puede agregar {ingrediente.nombre} - estado: {ingrediente.estado}")
         return False
 
     def tile_actual(self):
@@ -219,7 +222,7 @@ class Chef:
             "Papa":   pygame.transform.scale(pygame.image.load("tileset/tile15.png"),  (40, 40)),
             "Tomate": pygame.transform.scale(pygame.image.load("tileset/tile21.png"),  (40, 40)),
             "Pan":    pygame.transform.scale(pygame.image.load("tileset/tile20.png"), (40, 40)),
-            "Plato":  pygame.transform.scale(pygame.image.load("tileset/tile10.png"), (40, 40)),
+            "Plato":  pygame.transform.scale(pygame.image.load("tileset/tile11.png"), (40, 40)),
         }
 
     def mover(self, keys, ancho_ventana, alto_ventana, obstaculos_tiles):

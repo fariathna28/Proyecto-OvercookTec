@@ -55,7 +55,7 @@ class Mundo():
                 image_x = x * Constantes.TILE_SIZE
                 image_y = y * Constantes.TILE_SIZE
                 image_rect.topleft = (image_x, image_y)
-                tile_data = [image, image_rect, image_x, image_y, tile]
+                tile_data = [image, image_rect, image_x, image_y, tile, None]
  
                 if tile in obstaculos:
                     self.obstaculos_tiles.append(

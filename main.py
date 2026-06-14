@@ -159,9 +159,10 @@ def pantalla_nivel_2():
         elif isinstance(ing, PanesYBases):
             return "Pan"
         return None
- 
+    
+    """
     def ingrediente_desde_tile(num):
-        """Crea el ingrediente correcto (con estado) a partir del número de tile."""
+        Crea el ingrediente correcto (con estado) a partir del número de tile.
         if num == 15:
             ing = Proteina("Carne")
             ing.estado = "preparado"
@@ -184,9 +185,12 @@ def pantalla_nivel_2():
         elif num == 24:
             return PanesYBases("Pan")
         return None
+    """
  
-    # Tiles de mesa que contienen ingredientes recogibles
+    # Tiles de mesa que contienen ingredientes recogibles}
+    """
     TILES_MESA_RECOGIBLES = {15, 16, 25, 26, 22, 23, 24}
+    """
  
     fuente_hud = pygame.font.SysFont("Arial", 22)
  
@@ -244,14 +248,24 @@ def pantalla_nivel_2():
                         # Recoger ingrediente de mesa
                         elif tipo == "mesa":
                             for tile_data in world.map_tiles:
-                                if (tile_data[1].colliderect(chef.rect)
-                                        and tile_data[4] in TILES_MESA_RECOGIBLES):
-                                    ing_recogido = ingrediente_desde_tile(tile_data[4])
-                                    if ing_recogido:
-                                        tile_data[0] = tile_list[0]
-                                        tile_data[4] = 0
-                                        chef.ingrediente_mano = ing_recogido
-                                        world.actualizar_estaciones("nivel2")
+                                if tile_data[1].colliderect(chef.rect) and tile_data[5] is not None:
+                                    chef.ingrediente_mano = tile_data[5]  # <-- recuperar objeto
+                                    tile_data[5] = None
+                                    tile_data[0] = tile_list[0]
+                                    tile_data[4] = 0
+                                    world.actualizar_estaciones("nivel2")
+                                    break
+                        
+                        elif tipo in ("mesa_Carne_cruda", "mesa_Carne_cocinada_cruda", "mesa_Tomate_cruda",
+                                    "mesa_Tomate_cut_cruda", "mesa_Pan_cruda", "mesa_Papa_cruda", 
+                                    "mesa_Papa_cocinada_cruda"):
+                            for tile_data in world.map_tiles:
+                                if tile_data[1].colliderect(chef.rect) and tile_data[5] is not None:
+                                    chef.ingrediente_mano = tile_data[5]
+                                    tile_data[5] = None
+                                    tile_data[0] = tile_list[0]
+                                    tile_data[4] = 0
+                                    world.actualizar_estaciones("nivel2")
                                     break
  
                     # ══════════════════════════════════════
@@ -263,6 +277,10 @@ def pantalla_nivel_2():
  
                         # Dejar carne en cocina
                         if tipo == "cocina" and isinstance(ing, Proteina):
+                            print(f"tipo: {tipo}, ingrediente: {ing.nombre}")
+                            print(f"procesando_estaciones: {procesando_estaciones}")
+                            pos = pos_estacion("cocina")
+                            print(f"pos encontrada: {pos}")
                             if "cocina" not in procesando_estaciones:
                                 pos = pos_estacion("cocina")
                                 if pos:
@@ -304,6 +322,7 @@ def pantalla_nivel_2():
                                         indice = mesa_tiles1[nombre_tile]
                                         tile_data[0] = tile_list[indice]
                                         tile_data[4] = indice
+                                        tile_data[5] = ing  # <-- guardar objeto
                                         break
                                 world.actualizar_estaciones("nivel2")
                             chef.ingrediente_mano = None
@@ -324,15 +343,17 @@ def pantalla_nivel_2():
                                 plato.agregar(ing_pan)
  
                         # Agregar ingrediente procesado desde mesa
-                        elif tipo == "mesa":
+                        elif tipo in ("mesa_Carne_cruda", "mesa_Carne_cocinada_cruda", "mesa_Tomate_cruda",
+                                    "mesa_Tomate_cut_cruda", "mesa_Pan_cruda", "mesa_Papa_cruda",
+                                    "mesa_Papa_cocinada_cruda"):
+                            # agregar ingrediente de mesa al plato
                             for tile_data in world.map_tiles:
-                                if tile_data[1].colliderect(chef.rect):
-                                    ing_procesado = ingrediente_desde_tile(tile_data[4])
-                                    if ing_procesado and plato.puede_agregar(ing_procesado):
-                                        plato.agregar(ing_procesado)
-                                        nuevo_tile = plato.tile_actual()
-                                        tile_data[0] = tile_list[nuevo_tile]
-                                        tile_data[4] = nuevo_tile
+                                if tile_data[1].colliderect(chef.rect) and tile_data[5] is not None:
+                                    if plato.puede_agregar(tile_data[5]):
+                                        plato.agregar(tile_data[5])
+                                        tile_data[5] = None
+                                        tile_data[0] = tile_list[0]
+                                        tile_data[4] = 0
                                         world.actualizar_estaciones("nivel2")
                                     break
  
