@@ -58,12 +58,41 @@ class Proteina(Ingrediente):
                 self.cocinada = True
 
 class Plato:
+    # Orden fijo de ensamblado
+    ORDEN_INGREDIENTES = ["Pan", "Carne", "Tomate", "Papa"]
+    
+    # Qué tile mostrar según contenido
+    TILE_POR_CONTENIDO = {
+        (): 10,
+        ("Pan",): 34,
+        ("Pan", "Carne"): 41,
+        ("Pan", "Carne", "Tomate"): 39,
+        ("Pan", "Carne", "Tomate", "Papa"): 38,
+    }
+
     def __init__(self):
         self.nombre = "Plato"
         self.ingredientes = []
-    
+
+    def puede_agregar(self, ingrediente):
+        # Solo acepta ingredientes preparados
+        if ingrediente.estado != "preparado":
+            return False
+        # Verifica que sea el siguiente en el orden
+        siguiente_idx = len(self.ingredientes)
+        if siguiente_idx >= len(self.ORDEN_INGREDIENTES):
+            return False
+        return ingrediente.nombre == self.ORDEN_INGREDIENTES[siguiente_idx]
+
     def agregar(self, ingrediente):
-        self.ingredientes.append(ingrediente)
+        if self.puede_agregar(ingrediente):
+            self.ingredientes.append(ingrediente)
+            return True
+        return False
+
+    def tile_actual(self):
+        clave = tuple(i.nombre for i in self.ingredientes)
+        return self.TILE_POR_CONTENIDO.get(clave, 10)
     
 
 
@@ -89,10 +118,11 @@ class Receta:
             if self.puntos_receta <= 0:
                 self.activa = False
 
-    def comparar_receta(self, otra_receta):
-        nombres_self = sorted([i.nombre for i in self.lista_ingredientes])
-        nombres_otra = sorted([i.nombre for i in otra_receta.lista_ingredientes])
-        return nombres_self == nombres_otra
+    def comparar_receta(self, plato):
+        # plato es un objeto Plato con lista de ingredientes ensamblados
+        nombres_receta = [i.nombre for i in self.lista_ingredientes]
+        nombres_plato  = [i.nombre for i in plato.ingredientes]
+        return nombres_receta == nombres_plato
 
     def __str__(self):
         ingredientes = ", ".join(str(i) for i in self.lista_ingredientes)
@@ -243,11 +273,17 @@ class Chef:
         ventana.blit(self.imagen, (self.x, self.y))
 
         if self.ingrediente_mano:
-            nombre = self.ingrediente_mano.nombre
-            print(f"Dibujando ingrediente: '{nombre}', en tiles: {list(self.ingredientes_tiles.keys())}")
-            if nombre in self.ingredientes_tiles:
-                img = self.ingredientes_tiles[nombre]
-                ventana.blit(img, (self.x + 40, self.y - 10))
+            if isinstance(self.ingrediente_mano, Plato):
+                idx = self.ingrediente_mano.tile_actual()
+                # tile_list no está disponible aquí, así que usamos el tile de Plato
+                img = self.ingredientes_tiles.get("Plato")
+                if img:
+                    ventana.blit(img, (self.x + 40, self.y - 10))
+            else:
+                nombre = self.ingrediente_mano.nombre
+                if nombre in self.ingredientes_tiles:
+                    img = self.ingredientes_tiles[nombre]
+                    ventana.blit(img, (self.x + 40, self.y - 10))
 
     def __str__(self):
         return f"Chef: {self.nombre} | Pts: {self.puntos}"
@@ -257,14 +293,18 @@ class Chef:
 #  COCINA
 # ─────────────────────────────────────────────
 class Cocina:
-    RECETAS_DISPONIBLES = {
-        "nivel1": [
-            ("Hamburguesa", [("Proteina", "Carne"), ("PanesYBases", "Pan"), ("VegetalesYFrutas", "Lechuga")]),
-            ("Hot Dog",     [("Proteina", "Salchicha"), ("PanesYBases", "Pan Largo")]),
-            ("Ensalada",    [("VegetalesYFrutas", "Tomate"), ("VegetalesYFrutas", "Lechuga")]),
-        ]
+    RECETAS_DISPONIBLES = RECETAS_DISPONIBLES = {
+    "nivel1": [
+        ("Hamburguesa", [("Proteina", "Carne"), ("PanesYBases", "Pan"), ("VegetalesYFrutas", "Lechuga")]),
+        ("Hot Dog",     [("Proteina", "Salchicha"), ("PanesYBases", "Pan Largo")]),
+        ("Ensalada",    [("VegetalesYFrutas", "Tomate"), ("VegetalesYFrutas", "Lechuga")]),
+    ],
+    "nivel2": [
+        ("Hamburguesa Simple",     [("PanesYBases", "Pan"), ("Proteina", "Carne")]),
+        ("Hamburguesa con Tomate", [("PanesYBases", "Pan"), ("Proteina", "Carne"), ("VegetalesYFrutas", "Tomate")]),
+        ("Hamburguesa Completa",   [("PanesYBases", "Pan"), ("Proteina", "Carne"), ("VegetalesYFrutas", "Tomate"), ("VegetalesYFrutas", "Papa")]),
+    ]
     }
-
     TIPOS = {
         "Proteina": Proteina,
         "VegetalesYFrutas": VegetalesYFrutas,
