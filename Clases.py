@@ -107,7 +107,7 @@ class Receta:
         self.nombre = nombre
         self.lista_ingredientes = lista_ingredientes
         self.puntos_receta = len(lista_ingredientes) * 10
-        self.max_time_receta = len(lista_ingredientes) * 15
+        self.max_time_receta = len(lista_ingredientes) * 30
         self.tiempo_transcurrido = 0
         self.activa = True
 
@@ -223,7 +223,12 @@ class Chef:
             "Tomate": pygame.transform.scale(pygame.image.load("tileset/tile21.png"),  (40, 40)),
             "Pan":    pygame.transform.scale(pygame.image.load("tileset/tile20.png"), (40, 40)),
             "Plato":  pygame.transform.scale(pygame.image.load("tileset/tile11.png"), (40, 40)),
-        }
+            "plato_vacio": pygame.transform.scale(pygame.image.load("tileset/tile11.png"), (40, 40)),
+            "plato_pan": pygame.transform.scale(pygame.image.load("tileset/tile29.png"), (40, 40)),
+            "plato_pan_carne": pygame.transform.scale(pygame.image.load("tileset/tile30.png"), (40, 40)),
+            "plato_pan_carne_tomate": pygame.transform.scale(pygame.image.load("tileset/tile32.png"), (40, 40)),
+            "plato_pan_carne_tomate_papa": pygame.transform.scale(pygame.image.load("tileset/tile33.png"), (40, 40)),
+        }   
 
     def mover(self, keys, ancho_ventana, alto_ventana, obstaculos_tiles):
         arriba, abajo, izquierda, derecha, accion = self.teclas
@@ -287,6 +292,20 @@ class Chef:
                 if nombre in self.ingredientes_tiles:
                     img = self.ingredientes_tiles[nombre]
                     ventana.blit(img, (self.x + 40, self.y - 10))
+        
+        if isinstance(self.ingrediente_mano, Plato):
+            clave = tuple(i.nombre for i in self.ingrediente_mano.ingredientes)
+            nombres_clave = {
+                (): "plato_vacio",
+                ("Pan",): "plato_pan",
+                ("Pan", "Carne"): "plato_pan_carne",
+                ("Pan", "Carne", "Tomate"): "plato_pan_carne_tomate",
+                ("Pan", "Carne", "Tomate", "Papa"): "plato_pan_carne_tomate_papa",
+            }
+            nombre_img = nombres_clave.get(clave, "plato_vacio")
+            img = self.ingredientes_tiles.get(nombre_img)
+            if img:
+                ventana.blit(img, (self.x + 40, self.y - 10))
 
     def __str__(self):
         return f"Chef: {self.nombre} | Pts: {self.puntos}"
@@ -320,7 +339,7 @@ class Cocina:
         self.estaciones = []
         self.ordenes = []
         self.nivel = nivel
-        self.intervalo_receta = 15
+        self.intervalo_receta = 30
         self.tiempo_ultima_receta = 0
 
     def agregar_chef(self, chef):
