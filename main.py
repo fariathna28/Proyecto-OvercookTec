@@ -27,7 +27,7 @@ Constantes.fuente_bonita_pequeña = pygame.font.SysFont("Mocha Choco", 28)
 ventana = pygame.display.set_mode((ANCHO, ALTO))
 pygame.display.set_caption("Over Cook Tec")
 
-fondo1 = pygame.image.load("fondo1.png")
+fondo1 = pygame.image.load("Imagenes/fondo1.png")
 fondo1 = pygame.transform.scale(fondo1, (ANCHO, ALTO))
 
 clock = pygame.time.Clock()
@@ -73,7 +73,7 @@ def pantalla_nivel_1():
     # teclas = (arriba, abajo, izquierda, derecha)
     chef1 = Chef(
         nombre="Chef 1",
-        imagen_path="gato.png",
+        imagen_path="Imagenes/gato.png",
         x=200, y=300,
         teclas=(pygame.K_w, pygame.K_s, pygame.K_a, pygame.K_d, pygame.K_e),
         velocidad=3
@@ -81,7 +81,7 @@ def pantalla_nivel_1():
 
     chef2 = Chef(
         nombre="Chef 2",
-        imagen_path="gato2.png",
+        imagen_path="Imagenes/gato2.png",
         x=400, y=300,
         teclas=(pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT, pygame.K_KP0),
         velocidad=3
@@ -224,9 +224,9 @@ def pantalla_niveles():
     facil_txt  = Constantes.fuente_bonita_pequeña.render("Fácil",   True, Constantes.NEGRO)
 
     botones = [
-        {"rect": pygame.Rect(ANCHO//2 - 500, ALTO//2 + 30, 200, 80), "texto": "Nivel 1", "icono": "icono_nivel1.png"},
-        {"rect": pygame.Rect(ANCHO//2 - 100, ALTO//2 + 30, 200, 80), "texto": "Nivel 2", "icono": "icono_nivel2.png"},
-        {"rect": pygame.Rect(ANCHO//2 + 300, ALTO//2 + 30, 200, 80), "texto": "Nivel 3", "icono": "icono_nivel3.png"},
+        {"rect": pygame.Rect(ANCHO//2 - 500, ALTO//2 + 30, 200, 80), "texto": "Nivel 1", "icono": "Imagenes/icono_nivel1.png"},
+        {"rect": pygame.Rect(ANCHO//2 - 100, ALTO//2 + 30, 200, 80), "texto": "Nivel 2", "icono": "Imagenes/icono_nivel2.png"},
+        {"rect": pygame.Rect(ANCHO//2 + 300, ALTO//2 + 30, 200, 80), "texto": "Nivel 3", "icono": "Imagenes/icono_nivel3.png"},
     ]
 
     fondo = pygame.Surface((ANCHO, ALTO))
