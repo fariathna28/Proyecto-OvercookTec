@@ -57,6 +57,15 @@ class Proteina(Ingrediente):
                 self.estado = "preparado"
                 self.cocinada = True
 
+class Plato:
+    def __init__(self):
+        self.nombre = "Plato"
+        self.ingredientes = []
+    
+    def agregar(self, ingrediente):
+        self.ingredientes.append(ingrediente)
+    
+
 
 # ─────────────────────────────────────────────
 #  RECETA
@@ -165,6 +174,7 @@ class Chef:
         self.x = x
         self.y = y
         self.velocidad = velocidad
+        self.rect = pygame.Rect(self.x - 10, self.y - 10, 100, 100)
 
         # teclas es una tupla: (arriba, abajo, izquierda, derecha)
         self.teclas = teclas
@@ -179,6 +189,7 @@ class Chef:
             "Papa":   pygame.transform.scale(pygame.image.load("tileset/tile15.png"),  (40, 40)),
             "Tomate": pygame.transform.scale(pygame.image.load("tileset/tile21.png"),  (40, 40)),
             "Pan":    pygame.transform.scale(pygame.image.load("tileset/tile20.png"), (40, 40)),
+            "Plato":  pygame.transform.scale(pygame.image.load("tileset/tile10.png"), (40, 40)),
         }
 
     def mover(self, keys, ancho_ventana, alto_ventana, obstaculos_tiles):
@@ -217,6 +228,7 @@ class Chef:
 
         self.x = chef_rect.x
         self.y = chef_rect.y
+        self.rect = pygame.Rect(self.x - 10, self.y - 10, 100, 100)
 
     def agarrar(self, estaciones_tiles):
         arriba, abajo, izquierda, derecha, accion = self.teclas

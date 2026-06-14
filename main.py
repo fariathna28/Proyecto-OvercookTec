@@ -13,7 +13,7 @@ from mundo import Mundo
 from Clases import (
     Chef, Cocina,
     EstacionDespensa, EstacionEntrega, Estacion,
-    Proteina, VegetalesYFrutas, PanesYBases
+    Proteina, VegetalesYFrutas, PanesYBases, Plato
 )
 
 
@@ -51,7 +51,7 @@ world_data = [
 ]
 
 world = Mundo()
-world.process_data(world_data, tile_list, "nivel1")
+world.process_data(world_data, tile_list, "nivel2")
 for tile in world.map_tiles:
     print(tile[1].x, tile[1].y) 
 
@@ -64,10 +64,33 @@ def dibujar_grid():
 # ─────────────────────────────────────────────
 #  NIVEL 1  –  usa las clases Chef y Cocina
 # ─────────────────────────────────────────────
-def pantalla_nivel_1():
+def pantalla_nivel_2():
+    mesa_tiles1 = {
+        "Carne": 16,
+        "Carne_cocinada": 15,
+        "Tomate": 25,
+        "Tomate_cut": 26,
+        "Pan" : 24,
+        "Papa": 22,
+        "Papa_cocinada": 23,
+        "Plato": 36,
+        "plato_pan": 34,
+        "plato_papa": 35,
+        "plato_pan_carne": 41,
+        "plato_pan_carne2": 40,
+        "plato_pan_carne_tomate": 39,
+        "plato_pan_carne_tomate_papa": 38
+    }
+    mesa_ingredientes = {
+    "mesa_Carne_cruda": lambda: Proteina("Carne"),
+    "mesa_Tomate_cruda": lambda: VegetalesYFrutas("Tomate"),
+    "mesa_Pan_cruda": lambda: PanesYBases("Pan"),
+    "mesa_Papa_cruda": lambda: VegetalesYFrutas("Papa"),
+    # los platos y cocinados los agregas después según tu lógica
+    }
 
     # ── Crear cocina ──────────────────────────
-    cocina = Cocina(tiempo_total=120, nivel="nivel1")
+    cocina = Cocina(tiempo_total=120, nivel="nivel2")
 
     # ── Crear chefs: ambos se mueven simultáneamente ──
     # teclas = (arriba, abajo, izquierda, derecha)
@@ -112,9 +135,6 @@ def pantalla_nivel_1():
                 for chef in cocina.chefs:
                     if event.key == chef.teclas[4]:
                         tipo = chef.agarrar(world.estaciones_tiles)
-                        print(f"{chef.nombre} presionó E → tipo: {tipo}")  # ← agrega esto
-                        print(f"Chef pos: {chef.x}, {chef.y}")
-                        print(f"Estaciones: {[(e['tipo'], e['rect'].x, e['rect'].y) for e in world.estaciones_tiles]}")
 
                         if chef.ingrediente_mano is None:
                             if tipo == "estacion_carne":
@@ -125,6 +145,17 @@ def pantalla_nivel_1():
                                 chef.ingrediente_mano = VegetalesYFrutas("Tomate")
                             elif tipo == "estacion_papas":      
                                 chef.ingrediente_mano = VegetalesYFrutas("Papa")
+                            elif tipo == "estacion_platos":      
+                                chef.ingrediente_mano = Plato()
+                            elif tipo in mesa_ingredientes:
+                                for tile_data in world.map_tiles:
+                                    if tile_data[1].colliderect(chef.rect) and tile_data[4] != 0 and tile_data[4] != 1 and tile_data[4] != 2:
+                                        tile_data[0] = tile_list[0]
+                                        tile_data[4] = 0
+                                        break
+                                world.actualizar_estaciones("nivel2")
+                                chef.ingrediente_mano = mesa_ingredientes[tipo]()
+
 
                         elif chef.ingrediente_mano is not None:
                             if tipo == "cocina":
@@ -137,6 +168,18 @@ def pantalla_nivel_1():
                                 if isinstance(chef.ingrediente_mano, VegetalesYFrutas):
                                     chef.esta_procesando = True
                             elif tipo == "entrega":
+                                chef.ingrediente_mano = None
+
+                            
+                            elif tipo == "mesa":
+                                if chef.ingrediente_mano and chef.ingrediente_mano.nombre in mesa_tiles1:
+                                    for tile_data in world.map_tiles:
+                                        if tile_data[1].colliderect(chef.rect) and tile_data[4] == 0:
+                                            indice = mesa_tiles1[chef.ingrediente_mano.nombre]
+                                            tile_data[0] = tile_list[indice]
+                                            tile_data[4] = indice
+                                            break
+                                    world.actualizar_estaciones("nivel2")
                                 chef.ingrediente_mano = None
 
 
@@ -186,7 +229,7 @@ def pantalla_nivel_1():
 # ─────────────────────────────────────────────
 #  NIVELES 2 Y 3  (sin cambios)
 # ─────────────────────────────────────────────
-def pantalla_nivel_2():
+def pantalla_nivel_1():
     fondo = pygame.Surface((ANCHO, ALTO))
     fondo.fill(Constantes.BLANCO)
     while True:
