@@ -3,16 +3,27 @@ import pygame
  
 estaciones_tiles = {
     "nivel1": {
-        1:  "tabla_picar",
-        2:  "estacion_pescaso",
-        4:  "estacion_arroz",
-        5:  "estacion_pepino",
-        8:  "estacion_algas",
-        14: "freidor",
-        15: "entrega",
-        22: "cocina",
-        23: "estacion_platos",
-        33: "mesa",
+        2:  "tabla_picar",
+        3:  "estacion_pescado",
+        5:  "estacion_arroz",
+        6:  "estacion_pepino",
+        9:  "estacion_algas",
+        15: "freidor",
+        16: "entrega",
+        23: "cocina",
+        24: "estacion_platos",
+        0: "mesa",
+        39:"mesa_alga",
+        20:"mesa_pescado_entero",
+        22:"mesa_pescado_cortado",
+        21:"mesa_pescado_cocinado",
+        25:"mesa_plato_alga",
+        27:"mesa_pepino_entero",
+        28:"mesa_arroz",
+        29:"mesa_pepino_cortado",
+        30:"mesa_sushi_pepino"
+        
+
 },
     
     "nivel2": {
@@ -43,7 +54,7 @@ estaciones_tiles = {
 }
  
 obstaculos_tiles = {
-    "nivel1": {1,2,4,5,14,22,23,33},
+    "nivel1": {0, 2, 3, 5, 6, 9, 15, 16, 23, 24},
     "nivel2": {0, 3, 4, 5, 6, 9, 18, 27, 36, 45}
 }
  

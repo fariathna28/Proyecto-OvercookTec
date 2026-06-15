@@ -59,8 +59,10 @@ class Proteina(Ingrediente):
 
 class Plato:
     # Orden fijo de ensamblado
-    ORDEN_INGREDIENTES = ["Pan", "Carne", "Tomate", "Papa",  # nivel 2
-                      "Alga", "Arroz", "Pepino", "Pescado_cocinado"]
+    ORDEN_POR_NIVEL = {
+    "nivel1": ["Alga", "Arroz", "Pepino", "Pescado_cocinado"],
+    "nivel2": ["Pan", "Carne", "Tomate", "Papa"]}
+    
     
     # Qué tile mostrar según contenido
     TILE_POR_CONTENIDO = {
@@ -77,10 +79,11 @@ class Plato:
     }
 
 
-    def __init__(self):
+    def __init__(self, nivel="nivel2"):
         self.nombre = "Plato"
         self.ingredientes = []
         self.es_tempura = False
+        self.orden = self.ORDEN_POR_NIVEL[nivel]
 
 
     def tile_actual(self):
@@ -90,14 +93,13 @@ class Plato:
         return self.TILE_POR_CONTENIDO.get(clave, 10)
 
     def puede_agregar(self, ingrediente):
-        # Solo acepta ingredientes preparados
         if ingrediente.estado != "preparado":
             return False
         # Verifica que sea el siguiente en el orden
         siguiente_idx = len(self.ingredientes)
-        if siguiente_idx >= len(self.ORDEN_INGREDIENTES):
+        if siguiente_idx >= len(self.orden):
             return False
-        return ingrediente.nombre == self.ORDEN_INGREDIENTES[siguiente_idx]
+        return ingrediente.nombre == self.orden[siguiente_idx]
 
     def agregar(self, ingrediente):
         if self.puede_agregar(ingrediente):
@@ -222,7 +224,7 @@ class Chef:
         self.x = x
         self.y = y
         self.velocidad = velocidad
-        self.rect = pygame.Rect(self.x - 10, self.y - 10, 100, 100)
+        self.rect = pygame.Rect(self.x , self.y , 80, 80)
 
         # teclas es una tupla: (arriba, abajo, izquierda, derecha)
         self.teclas = teclas
@@ -233,6 +235,20 @@ class Chef:
 
         #Tiles de ingredientes
         self.ingredientes_tiles = {
+            "Pescado_entero": pygame.transform.scale(pygame.image.load("sushi_tiles/tile14.png"), (40, 40)),
+            "Pescado_cortado": pygame.transform.scale(pygame.image.load("sushi_tiles/tile5.png"), (40, 40)),
+            "Pescado_cocinado": pygame.transform.scale(pygame.image.load("sushi_tiles/tile35.png"), (40, 40)),
+            "Pepino": pygame.transform.scale(pygame.image.load("sushi_tiles/tile20.png"), (40, 40)),
+            "pepino_cortado": pygame.transform.scale(pygame.image.load("sushi_tiles/tile8.png"), (40, 40)),
+            "Arroz": pygame.transform.scale(pygame.image.load("sushi_tiles/tile37.png"), (40, 40)),
+            "Alga": pygame.transform.scale(pygame.image.load("sushi_tiles/tile39.png"), (40, 40)),
+            "plato": pygame.transform.scale(pygame.image.load("sushi_tiles/tile38.png"), (40, 40)),
+            "plato_alga": pygame.transform.scale(pygame.image.load("sushi_tiles/tile15.png"), (40, 40)),
+            "plato_alga_arroz": pygame.transform.scale(pygame.image.load("sushi_tiles/tile13.png"), (40, 40)),
+            "plato_alga,arroz,pepino": pygame.transform.scale(pygame.image.load("sushi_tiles/tile12.png"), (40, 40)),
+            "plato_alga,arroz,pepino,pescado": pygame.transform.scale(pygame.image.load("sushi_tiles/tile11.png"), (40, 40)),
+            "plato_alga,arroz,pepino,pescado,tempura": pygame.transform.scale(pygame.image.load("sushi_tiles/tile19.png"), (40, 40)),
+            #Nivel 2
             "Carne":  pygame.transform.scale(pygame.image.load("tileset/tile13.png"), (40, 40)),
             "Papa":   pygame.transform.scale(pygame.image.load("tileset/tile15.png"),  (40, 40)),
             "Tomate": pygame.transform.scale(pygame.image.load("tileset/tile21.png"),  (40, 40)),
@@ -243,6 +259,7 @@ class Chef:
             "plato_pan_carne": pygame.transform.scale(pygame.image.load("tileset/tile30.png"), (40, 40)),
             "plato_pan_carne_tomate": pygame.transform.scale(pygame.image.load("tileset/tile32.png"), (40, 40)),
             "plato_pan_carne_tomate_papa": pygame.transform.scale(pygame.image.load("tileset/tile33.png"), (40, 40)),
+
         }   
 
     def mover(self, keys, ancho_ventana, alto_ventana, obstaculos_tiles):
@@ -261,7 +278,7 @@ class Chef:
             if chef_rect.colliderect(obstaculo):
                 if dx > 0:  # moviéndose a la derecha
                     chef_rect.right = obstaculo.left
-                if dx < 0:  # moviéndose a la izquierda
+                elif dx < 0:  # moviéndose a la izquierda
                     chef_rect.left = obstaculo.right
 
         dy = 0
@@ -275,7 +292,7 @@ class Chef:
             if chef_rect.colliderect(obstaculo):
                 if dy > 0:  # moviéndose hacia abajo
                     chef_rect.bottom = obstaculo.top
-                if dy < 0:  # moviéndose hacia arriba
+                elif dy < 0:  # moviéndose hacia arriba
                     chef_rect.top = obstaculo.bottom
         
 
@@ -294,19 +311,9 @@ class Chef:
 
     def dibujar(self, ventana):
         ventana.blit(self.imagen, (self.x, self.y))
-
-        if self.ingrediente_mano:
-            if isinstance(self.ingrediente_mano, Plato):
-                idx = self.ingrediente_mano.tile_actual()
-                # tile_list no está disponible aquí, así que usamos el tile de Plato
-                img = self.ingredientes_tiles.get("Plato")
-                if img:
-                    ventana.blit(img, (self.x + 40, self.y - 10))
-            else:
-                nombre = self.ingrediente_mano.nombre
-                if nombre in self.ingredientes_tiles:
-                    img = self.ingredientes_tiles[nombre]
-                    ventana.blit(img, (self.x + 40, self.y - 10))
+        
+        if self.ingrediente_mano is None:
+            return
         
         if isinstance(self.ingrediente_mano, Plato):
             clave = tuple(i.nombre for i in self.ingrediente_mano.ingredientes)
@@ -316,11 +323,21 @@ class Chef:
                 ("Pan", "Carne"): "plato_pan_carne",
                 ("Pan", "Carne", "Tomate"): "plato_pan_carne_tomate",
                 ("Pan", "Carne", "Tomate", "Papa"): "plato_pan_carne_tomate_papa",
+
+                ("Alga",): "plato_alga",
+                ("Alga", "Arroz"): "plato_alga_arroz",
+                ("Alga", "Arroz", "Pepino"): "plato_alga,arroz,pepino",
+                ("Alga", "Arroz", "Pepino", "Pescado_cocinado"): "plato_alga,arroz,pepino,pescado",
             }
             nombre_img = nombres_clave.get(clave, "plato_vacio")
             img = self.ingredientes_tiles.get(nombre_img)
             if img:
                 ventana.blit(img, (self.x + 40, self.y - 10))
+        else:
+                nombre = self.ingrediente_mano.nombre
+                if nombre in self.ingredientes_tiles:
+                    img = self.ingredientes_tiles[nombre]
+                    ventana.blit(img, (self.x + 40, self.y - 10))
 
     def __str__(self):
         return f"Chef: {self.nombre} | Pts: {self.puntos}"
