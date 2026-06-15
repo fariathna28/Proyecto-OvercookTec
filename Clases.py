@@ -59,7 +59,8 @@ class Proteina(Ingrediente):
 
 class Plato:
     # Orden fijo de ensamblado
-    ORDEN_INGREDIENTES = ["Pan", "Carne", "Tomate", "Papa"]
+    ORDEN_INGREDIENTES = ["Pan", "Carne", "Tomate", "Papa",  # nivel 2
+                      "Alga", "Arroz", "Pepino", "Pescado_cocinado"]
     
     # Qué tile mostrar según contenido
     TILE_POR_CONTENIDO = {
@@ -68,11 +69,25 @@ class Plato:
         ("Pan", "Carne"): 41,
         ("Pan", "Carne", "Tomate"): 39,
         ("Pan", "Carne", "Tomate", "Papa"): 38,
+        ("Alga",): 24,
+        ("Alga", "Arroz"): 30,
+        ("Alga", "Arroz", "Pepino"): 29,
+        ("Alga", "Arroz", "Pepino", "Pescado_cocinado"): 32,
+        ("Alga", "Arroz", "Pepino", "Pescado_cocinado", "tempura"): 31,
     }
+
 
     def __init__(self):
         self.nombre = "Plato"
         self.ingredientes = []
+        self.es_tempura = False
+
+
+    def tile_actual(self):
+        if getattr(self, "es_tempura", False):
+            return 31  # tile sushi tempura
+        clave = tuple(i.nombre for i in self.ingredientes)
+        return self.TILE_POR_CONTENIDO.get(clave, 10)
 
     def puede_agregar(self, ingrediente):
         # Solo acepta ingredientes preparados
@@ -317,10 +332,11 @@ class Chef:
 class Cocina:
     RECETAS_DISPONIBLES = RECETAS_DISPONIBLES = {
     "nivel1": [
-        ("Hamburguesa", [("Proteina", "Carne"), ("PanesYBases", "Pan"), ("VegetalesYFrutas", "Lechuga")]),
-        ("Hot Dog",     [("Proteina", "Salchicha"), ("PanesYBases", "Pan Largo")]),
-        ("Ensalada",    [("VegetalesYFrutas", "Tomate"), ("VegetalesYFrutas", "Lechuga")]),
+        ("Sushi Pepino",  [("PanesYBases","Alga"), ("PanesYBases","Arroz"), ("VegetalesYFrutas","Pepino")]),
+        ("Sushi Pescado", [("PanesYBases","Alga"), ("PanesYBases","Arroz"), ("VegetalesYFrutas","Pepino"), ("Proteina","Pescado_cocinado")]),
+        ("Sushi Tempura", [("PanesYBases","Alga"), ("PanesYBases","Arroz"), ("VegetalesYFrutas","Pepino"), ("Proteina","Pescado_cocinado")]),
     ],
+
     "nivel2": [
         ("Hamburguesa Simple",     [("PanesYBases", "Pan"), ("Proteina", "Carne")]),
         ("Hamburguesa con Tomate", [("PanesYBases", "Pan"), ("Proteina", "Carne"), ("VegetalesYFrutas", "Tomate")]),

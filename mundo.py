@@ -2,6 +2,19 @@ import Constantes
 import pygame
  
 estaciones_tiles = {
+    "nivel1": {
+        1:  "tabla_picar",
+        2:  "estacion_pescaso",
+        4:  "estacion_arroz",
+        5:  "estacion_pepino",
+        8:  "estacion_algas",
+        14: "freidor",
+        15: "entrega",
+        22: "cocina",
+        23: "estacion_platos",
+        33: "mesa",
+},
+    
     "nivel2": {
         3:  "estacion_papas",
         4:  "tabla_picar",
@@ -27,12 +40,11 @@ estaciones_tiles = {
         39: "mesa_plato_pan_carne_tomate_cruda",
         38: "mesa_plato_pan_carne_tomate_papa_cruda",
     },
-    "nivel1": {}
 }
  
 obstaculos_tiles = {
-    "nivel2": {0, 3, 4, 5, 6, 9, 18, 27, 36, 45},
-    "nivel1": {}
+    "nivel1": {1,2,4,5,14,22,23,33},
+    "nivel2": {0, 3, 4, 5, 6, 9, 18, 27, 36, 45}
 }
  
  

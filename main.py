@@ -46,45 +46,42 @@ def dibujar_grid():
                          end_pos=(ANCHO, x * Constantes.TILE_SIZE))
  
  
-# ─────────────────────────────────────────────
-#  NIVEL 1 — SUSHI
-# ─────────────────────────────────────────────
 def pantalla_nivel_1():
-
+ 
+    # ── Cargar tileset de sushi ──────────────
     tile_list_sushi = []
     for x in range(62):
         tile_image = pygame.image.load(f"sushi_tiles/tile{x+1}.png")
         tile_image = pygame.transform.scale(tile_image, size=(Constantes.TILE_SIZE, Constantes.TILE_SIZE))
         tile_list_sushi.append(tile_image)
-
-    # tiles de sushi (tileset separado)
-    for x in range(62):
-        tile_image = pygame.image.load(f"sushi_tiles/tile{x+1}.png")
-        tile_image = pygame.transform.scale(tile_image, size=(Constantes.TILE_SIZE, Constantes.TILE_SIZE))
-        tile_list_sushi.append(tile_image)
-        
+ 
     # ── World propio del nivel 1 ─────────────
     world = Mundo()
     world_data_nivel1 = [
-        # TODO: diseña tu mapa aquí con los tiles del tileset de sushi
-        # Ejemplo placeholder — reemplázalo con tu mapa real
-        [33,1, 33, 33, 33, 33, 2, 33],
-        [23, 0, 0, 0, 0, 0, 0, 33],
-        [33, 0, 0, 22, 14, 0, 0, 15],
-        [4, 0, 0, 0, 0, 0, 0, 33],
-        [33, 5, 33, 33, 33, 33, 8, 33],
+        [33, 1, 33, 33, 33, 33,  2, 33],
+        [23,  0,  0,  0,  0,  0,  0, 33],
+        [33,  0,  0, 22, 14,  0,  0, 15],
+        [ 4,  0,  0,  0,  0,  0,  0, 33],
+        [33,  5, 33, 33, 33, 33,  8, 33],
     ]
     world.process_data(world_data_nivel1, tile_list_sushi, "nivel1")
+    print(f"Estaciones registradas: {[(e['tipo'], e['rect']) for e in world.estaciones_tiles]}")
+    print(f"Obstáculos: {world.obstaculos_tiles}")
  
     # ── Tiles de ingredientes en mesa ────────
-    # TODO: reemplaza los números con los tiles correctos del tileset de sushi
     mesa_tiles1 = {
-        "Alga":             0,   
-        "Arroz":            0,  
-        "Pepino_cortado":   0,  
-        "Pescado":          0,   
-        "Pescado_cortado":  0,  
-        "Pescado_tempura":  0,  
+        "Pescado_entero":                          19,
+        "Pescado_cortado":                         21,
+        "Pescado_cocinado":                        20,
+        "Pepino":                                  26,
+        "Pepino_cortado":                          28,
+        "Arroz":                                   27,
+        "Plato":                                   23,
+        "Plato_alga":                              24,
+        "Plato_alga_arroz":                        30,
+        "Plato_alga_arroz_pepino":                 29,
+        "Plato_alga_arroz_pepino_pescado":         32,
+        "Plato_alga_arroz_pepino_pescado_cocinado":31,
     }
  
     # ── Cocina ───────────────────────────────
@@ -112,25 +109,24 @@ def pantalla_nivel_1():
     procesando_estaciones = {}
  
     TIEMPOS_PROCESO = {
-        "tabla_picar": 3.0,   # cortar pepino y pescado
-        "freidor":     4.0,   # hacer tempura
-    }
-    # TODO: reemplaza con los números de tile correctos del sushi tileset
-    TILE_OVERLAY_CRUDO = {
-        "tabla_picar": 0,   # TODO: pepino crudo sobre tabla
-        "freidor":     0,   # TODO: pescado cortado sobre freidor
-    }
-    TILE_OVERLAY_LISTO = {
-        "tabla_picar": 0,   # TODO: pepino/pescado cortado
-        "freidor":     0,   # TODO: pescado tempura
+        "tabla_picar": 3.0,
+        "cocina":      5.0,
+        "freidor":     4.0,
     }
  
-    # La tabla de picar puede recibir pepino O pescado
-    # guardamos qué ingrediente se está procesando para saber qué devolver
-    INGREDIENTE_RESULTADO = {
-        "tabla_picar_Pepino":  lambda: VegetalesYFrutas("Pepino"),
-        "tabla_picar_Pescado": lambda: Proteina("Pescado"),
-        "freidor":             lambda: Proteina("Pescado"),
+    # tile a mostrar MIENTRAS procesa (índice base 1, restamos 1 al acceder)
+    TILE_OVERLAY_CRUDO = {
+        "tabla_picar": 19,  # pescado entero o pepino crudo
+        "cocina":      21,  # pescado cortado crudo
+        "freidor":     32,  # sushi sobre freidor
+    }
+ 
+    # tile a mostrar cuando YA está listo
+    TILE_OVERLAY_LISTO = {
+        "tabla_picar_Pepino":         28,  # pepino cortado
+        "tabla_picar_Pescado_entero": 21,  # pescado cortado crudo
+        "cocina":                     20,  # pescado cocinado
+        "freidor":                    31,  # sushi tempura
     }
  
     # ── Helpers ──────────────────────────────
@@ -154,19 +150,12 @@ def pantalla_nivel_1():
         return None
  
     def nombre_tile_para_ingrediente(ing):
-        if isinstance(ing, PanesYBases):
-            if ing.nombre == "Alga":
-                return "Alga"
-            elif ing.nombre == "Arroz":
-                return "Arroz"
+        if isinstance(ing, Proteina):
+            return ing.nombre  # "Pescado_entero", "Pescado_cortado", "Pescado_cocinado"
         elif isinstance(ing, VegetalesYFrutas) and ing.nombre == "Pepino":
             return "Pepino_cortado" if ing.estado == "preparado" else "Pepino"
-        elif isinstance(ing, Proteina) and ing.nombre == "Pescado":
-            if ing.estado == "preparado" and hasattr(ing, "tempura") and ing.tempura:
-                return "Pescado_tempura"
-            elif ing.estado == "preparado":
-                return "Pescado_cortado"
-            return "Pescado"
+        elif isinstance(ing, PanesYBases) and ing.nombre == "Arroz":
+            return "Arroz"
         return None
  
     fuente_hud = pygame.font.SysFont("Arial", 22)
@@ -186,6 +175,11 @@ def pantalla_nivel_1():
  
                 for chef in cocina.chefs:
                     if event.key != chef.teclas[4]:
+                        if event.type == pygame.KEYDOWN:
+                            print(f"Tecla presionada: {event.key}")
+                            print(f"Teclas chefs: {[chef.teclas[4] for chef in cocina.chefs]}")
+                            if event.key == pygame.K_ESCAPE:
+                                return
                         continue
  
                     tipo = encontrar_estacion_cercana(chef)
@@ -195,15 +189,12 @@ def pantalla_nivel_1():
                     # ══════════════════════════════════════
                     if chef.ingrediente_mano is None:
  
-                        # Despensas
-                        if tipo == "estacion_alga":
-                            chef.ingrediente_mano = PanesYBases("Alga")
+                        if tipo == "estacion_pepino":
+                            chef.ingrediente_mano = VegetalesYFrutas("Pepino")
+                        elif tipo == "estacion_pescaso":   # nombre tal como está en mundo.py
+                            chef.ingrediente_mano = Proteina("Pescado_entero")
                         elif tipo == "estacion_arroz":
                             chef.ingrediente_mano = PanesYBases("Arroz")
-                        elif tipo == "estacion_pepino":
-                            chef.ingrediente_mano = VegetalesYFrutas("Pepino")
-                        elif tipo == "estacion_pescado":
-                            chef.ingrediente_mano = Proteina("Pescado")
                         elif tipo == "estacion_platos":
                             chef.ingrediente_mano = Plato()
  
@@ -212,24 +203,37 @@ def pantalla_nivel_1():
                             if "tabla_picar" in procesando_estaciones:
                                 datos = procesando_estaciones["tabla_picar"]
                                 if datos["listo"]:
-                                    clave = "tabla_picar_" + datos["ingrediente"]
-                                    ing = INGREDIENTE_RESULTADO[clave]()
-                                    ing.estado = "preparado"
+                                    nombre_ing = datos["ingrediente"]
+                                    if nombre_ing == "Pepino":
+                                        ing = VegetalesYFrutas("Pepino")
+                                        ing.estado = "preparado"
+                                    else:  # Pescado_entero
+                                        ing = Proteina("Pescado_cortado")
                                     ing.tiempo_preparacion = ing.tiempo_minimo
                                     chef.ingrediente_mano = ing
                                     world.quitar_overlay(datos["pos"])
                                     del procesando_estaciones["tabla_picar"]
  
-                        # Recoger de freidor (pescado tempura)
+                        # Recoger pescado cocinado de cocina
+                        elif tipo == "cocina":
+                            if "cocina" in procesando_estaciones:
+                                datos = procesando_estaciones["cocina"]
+                                if datos["listo"]:
+                                    ing = Proteina("Pescado_cocinado")
+                                    ing.estado = "preparado"
+                                    ing.tiempo_preparacion = ing.tiempo_minimo
+                                    chef.ingrediente_mano = ing
+                                    world.quitar_overlay(datos["pos"])
+                                    del procesando_estaciones["cocina"]
+ 
+                        # Recoger sushi tempura del freidor
                         elif tipo == "freidor":
                             if "freidor" in procesando_estaciones:
                                 datos = procesando_estaciones["freidor"]
                                 if datos["listo"]:
-                                    ing = INGREDIENTE_RESULTADO["freidor"]()
-                                    ing.estado = "preparado"
-                                    ing.tiempo_preparacion = ing.tiempo_minimo
-                                    ing.tempura = True
-                                    chef.ingrediente_mano = ing
+                                    plato_temp = datos["plato"]
+                                    plato_temp.es_tempura = True
+                                    chef.ingrediente_mano = plato_temp
                                     world.quitar_overlay(datos["pos"])
                                     del procesando_estaciones["freidor"]
  
@@ -251,38 +255,33 @@ def pantalla_nivel_1():
                             and not isinstance(chef.ingrediente_mano, Plato):
                         ing = chef.ingrediente_mano
  
-                        # Pepino o Pescado crudo → tabla de picar
+                        # Pepino crudo o Pescado entero → tabla de picar
                         if tipo == "tabla_picar" \
-                                and isinstance(ing, (VegetalesYFrutas, Proteina)) \
-                                and ing.nombre in ("Pepino", "Pescado") \
+                                and ing.nombre in ("Pepino", "Pescado_entero") \
                                 and ing.estado != "preparado":
                             if "tabla_picar" not in procesando_estaciones:
                                 pos = pos_estacion("tabla_picar")
                                 if pos:
-                                    # overlay: pepino o pescado crudo encima de tabla
-                                    overlay_idx = TILE_OVERLAY_CRUDO["tabla_picar"]
-                                    world.poner_overlay(pos, tile_list_sushi[overlay_idx])
+                                    world.poner_overlay(pos, tile_list_sushi[TILE_OVERLAY_CRUDO["tabla_picar"] - 1])
                                     procesando_estaciones["tabla_picar"] = {
                                         "pos": pos,
                                         "timer": 0.0,
                                         "listo": False,
-                                        "ingrediente": ing.nombre,  # "Pepino" o "Pescado"
+                                        "ingrediente": ing.nombre,
                                     }
                                     chef.ingrediente_mano = None
  
-                        # Pescado cortado → freidor (tempura)
-                        elif tipo == "freidor" \
+                        # Pescado cortado → cocina
+                        elif tipo == "cocina" \
                                 and isinstance(ing, Proteina) \
-                                and ing.nombre == "Pescado" \
-                                and ing.estado == "preparado" \
-                                and not getattr(ing, "tempura", False):
-                            if "freidor" not in procesando_estaciones:
-                                pos = pos_estacion("freidor")
+                                and ing.nombre == "Pescado_cortado":
+                            if "cocina" not in procesando_estaciones:
+                                pos = pos_estacion("cocina")
                                 if pos:
-                                    world.poner_overlay(pos, tile_list_sushi[TILE_OVERLAY_CRUDO["freidor"]])
-                                    procesando_estaciones["freidor"] = {
+                                    world.poner_overlay(pos, tile_list_sushi[TILE_OVERLAY_CRUDO["cocina"] - 1])
+                                    procesando_estaciones["cocina"] = {
                                         "pos": pos, "timer": 0.0, "listo": False,
-                                        "ingrediente": "Pescado",
+                                        "ingrediente": "Pescado_cortado",
                                     }
                                     chef.ingrediente_mano = None
  
@@ -293,7 +292,7 @@ def pantalla_nivel_1():
                                 for tile_data in world.map_tiles:
                                     if tile_data[1].colliderect(chef.rect) and tile_data[4] == 0:
                                         indice = mesa_tiles1[nombre_tile]
-                                        tile_data[0] = tile_list_sushi[indice]
+                                        tile_data[0] = tile_list_sushi[indice - 1]
                                         tile_data[4] = indice
                                         tile_data[5] = ing
                                         break
@@ -309,11 +308,13 @@ def pantalla_nivel_1():
                     elif isinstance(chef.ingrediente_mano, Plato):
                         plato = chef.ingrediente_mano
  
-                        # Agregar alga o arroz directo desde despensa
-                        if tipo == "estacion_alga":
+                        # Alga directo desde estación
+                        if tipo == "estacion_algas":
                             ing_alga = PanesYBases("Alga")
                             if plato.puede_agregar(ing_alga):
                                 plato.agregar(ing_alga)
+ 
+                        # Arroz directo desde estación
                         elif tipo == "estacion_arroz":
                             ing_arroz = PanesYBases("Arroz")
                             if plato.puede_agregar(ing_arroz):
@@ -330,6 +331,20 @@ def pantalla_nivel_1():
                                         tile_data[4] = 0
                                         world.actualizar_estaciones("nivel1")
                                     break
+ 
+                        # Plato completo → freidor → sushi tempura
+                        elif tipo == "freidor":
+                            nombres = [i.nombre for i in plato.ingredientes]
+                            if sorted(nombres) == sorted(["Alga", "Arroz", "Pepino", "Pescado_cocinado"]):
+                                if "freidor" not in procesando_estaciones:
+                                    pos = pos_estacion("freidor")
+                                    if pos:
+                                        world.poner_overlay(pos, tile_list_sushi[TILE_OVERLAY_CRUDO["freidor"] - 1])
+                                        procesando_estaciones["freidor"] = {
+                                            "pos": pos, "timer": 0.0, "listo": False,
+                                            "plato": plato,
+                                        }
+                                        chef.ingrediente_mano = None
  
                         # Entregar plato
                         elif tipo == "entrega":
@@ -351,12 +366,18 @@ def pantalla_nivel_1():
         # ── Lógica ───────────────────────────
         cocina.actualizar(delta)
  
+        # Avanzar timers
         for tipo_est, datos in list(procesando_estaciones.items()):
             if not datos["listo"]:
                 datos["timer"] += delta
                 if datos["timer"] >= TIEMPOS_PROCESO[tipo_est]:
                     datos["listo"] = True
-                    world.poner_overlay(datos["pos"], tile_list_sushi[TILE_OVERLAY_LISTO[tipo_est]])
+                    if tipo_est == "tabla_picar":
+                        clave = f"tabla_picar_{datos['ingrediente']}"
+                        idx = TILE_OVERLAY_LISTO.get(clave, 28)
+                    else:
+                        idx = TILE_OVERLAY_LISTO[tipo_est]
+                    world.poner_overlay(datos["pos"], tile_list_sushi[idx - 1])
  
         if cocina.tiempo <= 0:
             run = False
@@ -514,7 +535,10 @@ def pantalla_nivel_2():
                         continue
  
                     tipo = encontrar_estacion_cercana(chef)
- 
+                    print(f"Tipo detectado: {tipo}")
+                    print(f"Estaciones disponibles: {[e['tipo'] for e in world.estaciones_tiles]}")
+                    print(f"Chef rect: {chef.rect}")
+                    
                     if chef.ingrediente_mano is None:
  
                         if tipo == "estacion_carne":
