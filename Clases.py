@@ -41,16 +41,18 @@ class PanesYBases(Ingrediente):
 
 class Proteina(Ingrediente):
     tiempo_minimo = 5
-    tiempo_maximo = 10              # si se supera → quemado
+    tiempo_maximo = 15              # si se supera → quemado
 
     def __init__(self, nombre):
-        super().__init__(nombre)
-        self.cocinada = False
+            super().__init__(nombre)
+            self.cocinada = False
+            self.tiempo_maximo = 15
 
     def actualizar_estado(self, delta):
         if self.estado in ("crudo", "preparado"):
             self.tiempo_preparacion += delta
-            if self.tiempo_preparacion >= self.tiempo_maximo:   
+            if self.tiempo_preparacion >= self.tiempo_maximo:
+                self.estado = "quemado"
                 self.cocinada = False
             elif self.tiempo_preparacion >= self.tiempo_minimo: 
                 self.estado = "preparado"

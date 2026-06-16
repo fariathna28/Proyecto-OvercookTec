@@ -1,3 +1,4 @@
+
 import pygame
 import sys
  
@@ -86,7 +87,7 @@ def pantalla_nivel_1():
     }
  
     # ── Cocina ───────────────────────────────
-    cocina = Cocina(tiempo_total=120, nivel="nivel1")
+    cocina = Cocina(tiempo_total=250, nivel="nivel1")
  
     # ── Chefs ────────────────────────────────
     chef1 = Chef(
@@ -100,7 +101,7 @@ def pantalla_nivel_1():
         nombre="Chef 2",
         imagen_path="Imagenes/gato2.png",
         x=400, y=300,
-        teclas=(pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT, pygame.K_KP0),
+        teclas=(pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT, pygame.K_m),
         velocidad=3,
     )
     cocina.agregar_chef(chef1)
@@ -117,6 +118,7 @@ def pantalla_nivel_1():
  
     # tile a mostrar MIENTRAS procesa (índice base 1, restamos 1 al acceder)
     TILE_OVERLAY_CRUDO = {
+        "tabla_picar": 7,
         "tabla_picar_Pepino": 19,  # pepino 
         "tabla_picar_Pescado_entero": 13,  # pescado 
         "cocina":      4,  # pescado cortado crudo
@@ -125,6 +127,7 @@ def pantalla_nivel_1():
  
     # tile a mostrar cuando YA está listo
     TILE_OVERLAY_LISTO = {
+        "tabla_picar": 7,
         "tabla_picar_Pepino":         7,  # pepino cortado
         "tabla_picar_Pescado_entero": 4,  # pescado cortado crudo
         "cocina":                     34,  # pescado cocinado
@@ -205,6 +208,7 @@ def pantalla_nivel_1():
                             if "tabla_picar" in procesando_estaciones:
                                 datos = procesando_estaciones["tabla_picar"]
                                 if datos["listo"]:
+                                    print("INTENTANDO RECOGER:", datos)
                                     nombre_ing = datos["ingrediente"]
                                     if nombre_ing == "Pepino":
                                         ing = VegetalesYFrutas("Pepino")
@@ -377,18 +381,38 @@ def pantalla_nivel_1():
         # ── Lógica ───────────────────────────
         cocina.actualizar(delta)
  
-        # Avanzar timers
         for tipo_est, datos in list(procesando_estaciones.items()):
+
             if not datos["listo"]:
+
                 datos["timer"] += delta
+
                 if datos["timer"] >= TIEMPOS_PROCESO[tipo_est]:
                     datos["listo"] = True
+                    datos["timer_quemado"] = 0
+
                     if tipo_est == "tabla_picar":
                         clave = f"tabla_picar_{datos['ingrediente']}"
-                        idx = TILE_OVERLAY_LISTO.get(clave, 28)
+                        idx = TILE_OVERLAY_LISTO.get(clave, TILE_OVERLAY_LISTO["tabla_picar"])
                     else:
                         idx = TILE_OVERLAY_LISTO[tipo_est]
                     world.poner_overlay(datos["pos"], tile_list_sushi[idx])
+                    print("LISTO:", tipo_est)
+
+            else:
+
+                if tipo_est in ("cocina", "freidor"):
+
+                    datos["timer_quemado"] += delta
+
+                    if datos["timer_quemado"] >= 10:
+                        print("SE QUEMO:", tipo_est)
+
+                        mensaje = "¡La comida se quemo!"
+                        mensaje_timer = 2
+
+                        world.quitar_overlay(datos["pos"])
+                        del procesando_estaciones[tipo_est]
  
         if cocina.tiempo <= 0:
             run = False
@@ -453,7 +477,7 @@ def pantalla_nivel_2():
         "plato_pan_carne_tomate_papa": 38,
     }
  
-    cocina = Cocina(tiempo_total=120, nivel="nivel2")
+    cocina = Cocina(tiempo_total=250, nivel="nivel2")
  
     chef1 = Chef(
         nombre="Chef 1",
@@ -466,7 +490,7 @@ def pantalla_nivel_2():
         nombre="Chef 2",
         imagen_path="Imagenes/gato2.png",
         x=400, y=300,
-        teclas=(pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT, pygame.K_KP0),
+        teclas=(pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT, pygame.K_m),
         velocidad=3,
     )
     cocina.agregar_chef(chef1)
@@ -701,11 +725,29 @@ def pantalla_nivel_2():
         cocina.actualizar(delta)
  
         for tipo_est, datos in list(procesando_estaciones.items()):
-            if not datos["listo"]:
-                datos["timer"] += delta
-                if datos["timer"] >= TIEMPOS_PROCESO[tipo_est]:
-                    datos["listo"] = True
-                    world.poner_overlay(datos["pos"], tile_list[TILE_OVERLAY_LISTO[tipo_est]])
+
+                    if not datos["listo"]:
+                        datos["timer"] += delta
+
+                        if datos["timer"] >= TIEMPOS_PROCESO[tipo_est]:
+                            datos["listo"] = True
+                            datos["timer_quemado"] = 0
+
+                            world.poner_overlay(
+                                datos["pos"],
+                                tile_list[TILE_OVERLAY_LISTO[tipo_est]]
+                            )
+                    else:
+                        # SOLO la cocina y el freidor acumulan tiempo de quemado
+                        if tipo_est in ("cocina", "freidor"):
+                            datos["timer_quemado"] += delta
+
+                            if datos["timer_quemado"] >= 5: # Tiempo de quemado nivel 2
+                                print("SE QUEMO:", tipo_est)
+                                # El ingrediente desaparece de la estación
+                                world.quitar_overlay(datos["pos"])
+                                del procesando_estaciones[tipo_est]
+                            
  
         if cocina.tiempo <= 0:
             run = False
@@ -770,7 +812,7 @@ def pantalla_nivel_3():
         "Platano_entero":31,
     }
 
-    cocina = Cocina(tiempo_total=120, nivel="nivel3")
+    cocina = Cocina(tiempo_total=300, nivel="nivel3")
 
     chef1 = Chef(
         nombre="Chef 1",
@@ -783,7 +825,7 @@ def pantalla_nivel_3():
         nombre="Chef 2",
         imagen_path="Imagenes/gato2.png",
         x=400, y=300,
-        teclas=(pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT, pygame.K_KP0),
+        teclas=(pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT, pygame.K_m),
         velocidad=3,
     )
     cocina.agregar_chef(chef1)
@@ -1047,19 +1089,37 @@ def pantalla_nivel_3():
         cocina.actualizar(delta)
 
         for tipo_est, datos in list(procesando_estaciones.items()):
-            if not datos["listo"]:
-                datos["timer"] += delta
-                if datos["timer"] >= TIEMPOS_PROCESO[tipo_est]:
-                    datos["listo"] = True
-                    if tipo_est == "tabla_picar":
-                        clave = f"tabla_picar_{datos['ingrediente']}"
-                        idx = TILE_OVERLAY_LISTO.get(clave, 0)
-                    elif tipo_est == "cocina": 
-                        clave = f"cocina_{datos.get('ingrediente', '')}"
-                        idx = TILE_OVERLAY_LISTO.get(clave, 0)
+
+                    if not datos["listo"]:
+                        datos["timer"] += delta
+
+                        if datos["timer"] >= TIEMPOS_PROCESO[tipo_est]:
+                            datos["listo"] = True
+                            datos["timer_quemado"] = 0
+
+                            # Determinamos el overlay correcto para el nivel 3
+                            if tipo_est == "tabla_picar":
+                                clave = f"tabla_picar_{datos['ingrediente']}"
+                                idx = TILE_OVERLAY_LISTO.get(clave, 15)
+                            elif tipo_est == "cocina":
+                                clave = f"cocina_{datos['ingrediente']}"
+                                idx = TILE_OVERLAY_LISTO.get(clave, 14)
+                            else:
+                                idx = TILE_OVERLAY_LISTO[tipo_est]
+
+                            world.poner_overlay(datos["pos"], tile_list_nivel3[idx])
+                            print("LISTO:", tipo_est)
                     else:
-                        idx = TILE_OVERLAY_LISTO[tipo_est]
-                    world.poner_overlay(datos["pos"], tile_list_nivel3[idx])
+                        # 🛑 SOLO la cocina y el freidor se queman
+                        if tipo_est in ("cocina", "freidor"):
+                            datos["timer_quemado"] += delta
+
+                            if datos["timer_quemado"] >= 5: # Tiempo de quemado nivel 3
+                                print("SE QUEMO:", tipo_est)
+                                # El ingrediente desaparece de la cocina/freidora
+                                world.quitar_overlay(datos["pos"])
+                                del procesando_estaciones[tipo_est]
+
 
         if cocina.tiempo <= 0:
             run = False
