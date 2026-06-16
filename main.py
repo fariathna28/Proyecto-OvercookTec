@@ -839,32 +839,32 @@ def pantalla_nivel_2():
 def pantalla_nivel_3():
     tile_list_nivel3 = []
     for x in range(48):  
-        tile_image = pygame.image.load(f"cr_tiles/tile{x+1}.png")
+        tile_image = pygame.image.load(f"cr_food_tiles/tile{x+1}.png")
         tile_image = pygame.transform.scale(tile_image, size=(Constantes.TILE_SIZE, Constantes.TILE_SIZE))
         tile_list_nivel3.append(tile_image)
 
     world = Mundo()
     world_data_nivel3 = [
-        [0,0,3,0,2,5,10,0],       
-        [38,1,1,0,1,1,1,0],
-        [4,1,1,0,0,1,42,0],
+        [0,0,3,0,2,5,11,0],       
+        [42,1,1,0,1,1,1,0],
+        [4,1,1,0,0,1,47,0],
         [0,1,1,1,1,1,1,0],
-        [0,7,0,9,0,6,0,0],
+        [0,7,0,10,0,6,0,0],
     ]
     world.process_data(world_data_nivel3, tile_list_nivel3, "nivel3")  
 
     mesa_tiles3 = {
 
-        "Platano_crudo":24,
-        "Platano_cocinado":25,
-        "Huevo":27,
-        "Huevo_cocinado":26,
+        "Platano_crudo":27,
+        "Platano_cocinado":28,
+        "Huevo":30,
+        "Huevo_cocinado":29,
         "Arroz":28,
-        "Frijoles":29,
-        "Salchichon_entero": 30,
-        "Salchichon_crudo":36,
-        "Salchichon_cocinado":35,
-        "Platano_entero":31,
+        "Frijoles":32,
+        "Salchichon_entero": 33,
+        "Salchichon_crudo":40,
+        "Salchichon_cocinado":41,
+        "Platano_entero":34,
     }
 
     cocina = Cocina(tiempo_total=300, nivel="nivel3")
@@ -894,18 +894,18 @@ def pantalla_nivel_3():
         "tabla_picar": 3.0,
     }
     TILE_OVERLAY_CRUDO = {
-        "cocina_Salchichon_cortado":15,
-        "cocina_Huevo": 19,
-        "freidor":16,
-        "tabla_picar_Salchichon":22,  
-        "tabla_picar_Platano":23,  
+        "cocina_Salchichon_cortado":16,
+        "cocina_Huevo": 21,
+        "freidor":10,
+        "tabla_picar_Salchichon":24,  
+        "tabla_picar_Platano":25,  
     }
     TILE_OVERLAY_LISTO = {
-        "cocina_Salchichon_cortado":14,
-        "cocina_Huevo": 18,
-        "freidor":17,
-        "tabla_picar_Salchichon":15,  
-        "tabla_picar_Platano":16,  
+        "cocina_Salchichon_cortado":16,
+        "cocina_Huevo": 20,
+        "freidor":10,
+        "tabla_picar_Salchichon":16,  
+        "tabla_picar_Platano":18,  
     }
     INGREDIENTE_RESULTADO = {
         "cocina":  lambda: Proteina("Salchichon_cocinado"),

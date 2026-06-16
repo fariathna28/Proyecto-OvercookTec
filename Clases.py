@@ -80,11 +80,11 @@ class Plato:
         ("Alga", "Arroz", "Pepino", "Pescado_cocinado"): 32,
         ("Alga", "Arroz", "Pepino", "Pescado_cocinado", "tempura"): 31,
 
-        ("Arroz",): 39,           # ← pon el número de tile correcto
-        ("Arroz", "Frijoles"): 32,
-        ("Arroz", "Frijoles", "Huevo"): 33,
-        ("Arroz", "Frijoles", "Huevo", "Salchichon"): 34,
-        ("Arroz", "Frijoles", "Huevo", "Salchichon", "Platano"): 37,
+        ("Arroz",):43 ,           # ← pon el número de tile correcto
+        ("Arroz", "Frijoles"): 36,
+        ("Arroz", "Frijoles", "Huevo"): 37,
+        ("Arroz", "Frijoles", "Huevo", "Salchichon"): 38,
+        ("Arroz", "Frijoles", "Huevo", "Salchichon", "Platano"): 41,
     }
 
 
@@ -269,23 +269,23 @@ class Chef:
             "plato_pan_carne_tomate": pygame.transform.scale(pygame.image.load("tileset/tile32.png"), (40, 40)),
             "plato_pan_carne_tomate_papa": pygame.transform.scale(pygame.image.load("tileset/tile33.png"), (40, 40)),
             #Nivel3
-            "Huevo": pygame.transform.scale(pygame.image.load("cr_tiles/tile20.png"), (40, 40)),
-            "Huevo_cocinado": pygame.transform.scale(pygame.image.load("cr_tiles/tile19.png"), (40, 40)),
-            "Salchichon_entero": pygame.transform.scale(pygame.image.load("cr_tiles/tile23.png"), (40, 40)),
-            "Salchichon_crudo": pygame.transform.scale(pygame.image.load("cr_tiles/tile16.png"), (40, 40)),
-            "Salchichon_cocinado": pygame.transform.scale(pygame.image.load("cr_tiles/tile15.png"), (40, 40)),
-            "Platano_entero": pygame.transform.scale(pygame.image.load("cr_tiles/tile24.png"), (40, 40)),
-            "Platano_crudo": pygame.transform.scale(pygame.image.load("cr_tiles/tile17.png"), (40, 40)),
-            "Platano_cocinado": pygame.transform.scale(pygame.image.load("cr_tiles/tile18.png"), (40, 40)),
-            "Arroz": pygame.transform.scale(pygame.image.load("cr_tiles/tile21.png"), (40, 40)),
-            "Frijoles": pygame.transform.scale(pygame.image.load("cr_tiles/tile22.png"), (40, 40)),
+            "Huevo": pygame.transform.scale(pygame.image.load("cr_food_tiles/tile22.png"), (40, 40)),
+            "Huevo_cocinado": pygame.transform.scale(pygame.image.load("cr_food_tiles/tile21.png"), (40, 40)),
+            "Salchichon_entero": pygame.transform.scale(pygame.image.load("cr_food_tiles/tile25.png"), (40, 40)),
+            "Salchichon_crudo": pygame.transform.scale(pygame.image.load("cr_food_tiles/tile17.png"), (40, 40)),
+            "Salchichon_cocinado": pygame.transform.scale(pygame.image.load("cr_food_tiles/tile16.png"), (40, 40)),
+            "Platano_entero": pygame.transform.scale(pygame.image.load("cr_food_tiles/tile26.png"), (40, 40)),
+            "Platano_crudo": pygame.transform.scale(pygame.image.load("cr_food_tiles/tile19.png"), (40, 40)),
+            "Platano_cocinado": pygame.transform.scale(pygame.image.load("cr_food_tiles/tile20.png"), (40, 40)),
+            "Arroz": pygame.transform.scale(pygame.image.load("cr_food_tiles/tile23.png"), (40, 40)),
+            "Frijoles": pygame.transform.scale(pygame.image.load("cr_food_tiles/tile24.png"), (40, 40)),
             # Platos nivel 3
-            "plato_vacio_cr": pygame.transform.scale(pygame.image.load("cr_tiles/tile42.png"), (40, 40)),
-            "plato_arroz": pygame.transform.scale(pygame.image.load("cr_tiles/tile41.png"), (40, 40)),
-            "plato_arroz_frijoles": pygame.transform.scale(pygame.image.load("cr_tiles/tile12.png"), (40, 40)),
-            "plato_arroz_frijoles_huevo": pygame.transform.scale(pygame.image.load("cr_tiles/tile13.png"), (40, 40)),
-            "plato_arroz_frijoles_huevo_salchichon": pygame.transform.scale(pygame.image.load("cr_tiles/tile14.png"), (40, 40)),
-            "plato_completo_cr": pygame.transform.scale(pygame.image.load("cr_tiles/tile9.png"), (40, 40)),
+            "plato_vacio_cr": pygame.transform.scale(pygame.image.load("cr_food_tiles/tile47.png"), (40, 40)),
+            "plato_arroz": pygame.transform.scale(pygame.image.load("cr_food_tiles/tile46.png"), (40, 40)),
+            "plato_arroz_frijoles": pygame.transform.scale(pygame.image.load("cr_food_tiles/tile13.png"), (40, 40)),
+            "plato_arroz_frijoles_huevo": pygame.transform.scale(pygame.image.load("cr_food_tiles/tile14.png"), (40, 40)),
+            "plato_arroz_frijoles_huevo_salchichon": pygame.transform.scale(pygame.image.load("cr_food_tiles/tile15.png"), (40, 40)),
+            "plato_completo_cr": pygame.transform.scale(pygame.image.load("cr_food_tiles/tile10.png"), (40, 40)),
 
         }   
 
