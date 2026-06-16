@@ -439,26 +439,39 @@ class Cocina:
         return Receta(nombre, ingredientes)
 
     def actualizar(self, delta):
-        self.tiempo -= delta
+            self.tiempo -= delta
 
-        # Generar receta nueva a intervalos
-        self.tiempo_ultima_receta += delta
-        if self.tiempo_ultima_receta >= self.intervalo_receta and self.tiempo > 0:
-            nueva = self.generar_receta()
-            if nueva:
-                self.ordenes.append(nueva)
-            self.tiempo_ultima_receta = 0
+            # Generar receta nueva a intervalos
+            self.tiempo_ultima_receta += delta
+            if self.tiempo_ultima_receta >= self.intervalo_receta and self.tiempo > 0:
+                nueva = self.generar_receta()
+                if nueva:
+                    self.ordenes.append(nueva)
+                self.tiempo_ultima_receta = 0
 
-        # Actualizar recetas y descontar puntos si expiran
-        for orden in self.ordenes:
-            orden.actualizar(delta)
+            # Actualizar recetas y descontar puntos si expiran
+            for orden in self.ordenes:
+                # Guardamos el estado antes de actualizar para saber si se vence en este frame
+                estado_anterior = orden.activa 
+                
+                orden.actualizar(delta)
 
-        # Limpiar recetas vencidas
-        self.ordenes = [o for o in self.ordenes if o.activa]
+                # REGLA 3: Si la receta estaba activa y se acaba de vencer por tiempo
+                if estado_anterior and not orden.activa:
+                    # El PDF dice que se descuenta el valor original de dicha receta
+                    penalizacion = orden.puntos_receta 
+                    
+                    # Se aplica la penalización a ambos chefs cuidando el puntaje mínimo de 0
+                    for chef in self.chefs:
+                        chef.puntos = max(0, chef.puntos - penalizacion)
+                    print(f"¡Receta expirada! Penalización de -{penalizacion} pts a los chefs.")
 
-        # Actualizar estaciones
-        for estacion in self.estaciones:
-            estacion.actualizar(delta)
+            # Limpiar recetas vencidas
+            self.ordenes = [o for o in self.ordenes if o.activa]
+
+            # Actualizar estaciones
+            for estacion in self.estaciones:
+                estacion.actualizar(delta)
 
     def dibujar(self, ventana):
         for chef in self.chefs:

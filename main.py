@@ -45,7 +45,39 @@ def dibujar_grid():
         pygame.draw.line(ventana, Constantes.BLANCO,
                          start_pos=(0, x * Constantes.TILE_SIZE),
                          end_pos=(ANCHO, x * Constantes.TILE_SIZE))
- 
+
+def mostrar_pantalla_resultados(ventana, chef1, chef2, ANCHO, ALTO):
+    """Muestra la pantalla de Game Over con la sumatoria de puntos de ambos chefs."""
+    puntaje_total_equipo = chef1.puntos + chef2.puntos
+    mostrando_resultados = True
+    
+    while mostrando_resultados:
+        ventana.fill((20, 20, 20)) # Fondo oscuro
+        
+        fuente_titulo = pygame.font.SysFont("Arial", 40, bold=True)
+        fuente_datos = pygame.font.SysFont("Arial", 28)
+        
+        txt_titulo = fuente_titulo.render("SE ACABÓ EL TIMEPO", True, (255, 70, 70))
+        txt_chef1 = fuente_datos.render(f"Puntos Chef 1: {chef1.puntos} pts", True, (200, 230, 255))
+        txt_chef2 = fuente_datos.render(f"Puntos Chef 2: {chef2.puntos} pts", True, (255, 230, 180))
+        txt_total = fuente_titulo.render(f"PUNTUACIÓN TOTAL: {puntaje_total_equipo} pts", True, (50, 255, 50))
+        txt_salir = fuente_datos.render("Presiona la tecla espacio para volver al menú", True, (200, 200, 200))
+        
+        ventana.blit(txt_titulo, (ANCHO // 2 - txt_titulo.get_width() // 2, 150))
+        ventana.blit(txt_chef1, (ANCHO // 2 - txt_chef1.get_width() // 2, 250))
+        ventana.blit(txt_chef2, (ANCHO // 2 - txt_chef2.get_width() // 2, 300))
+        ventana.blit(txt_total, (ANCHO // 2 - txt_total.get_width() // 2, 380))
+        ventana.blit(txt_salir, (ANCHO // 2 - txt_salir.get_width() // 2, 500))
+        
+        pygame.display.flip()
+        
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            if evento.type == pygame.KEYDOWN:
+                if evento.key == pygame.K_SPACE:
+                    mostrando_resultados = False
  
 def pantalla_nivel_1():
  
@@ -364,13 +396,28 @@ def pantalla_nivel_1():
                         # Entregar plato
                         elif tipo == "entrega":
                             puntos = 0
+                            receta_correcta = False
+                            
+                            # Buscar si el plato coincide con alguna orden en pantalla
                             for orden in cocina.ordenes:
                                 if orden.activa and orden.comparar_receta(plato):
                                     puntos = orden.puntos_receta
                                     orden.activa = False
+                                    receta_correcta = True
                                     break
-                            if puntos > 0:
+                            
+                            if receta_correcta:
+                                # REGLA 1: Receta correcta -> Sumar puntos al chef actual
                                 chef.puntos += puntos
+                                print(f"¡Entrega Exitosa por Chef! +{puntos} puntos.")
+                            else:
+                                # REGLA 2: Receta incorrecta -> Restar puntos al chef actual
+                                # Definimos una penalización fija (ej: 50 pts) y controlamos el mínimo en 0
+                                penalizacion_error = 50 
+                                chef.puntos = max(0, chef.puntos - penalizacion_error)
+                                print(f"¡Plato Incorrecto! Chef pierde -{penalizacion_error} puntos.")
+                            
+                            # En ambos casos se vacía la mano del chef al entregar
                             chef.ingrediente_mano = None
  
         # ── Movimiento ───────────────────────
@@ -440,8 +487,12 @@ def pantalla_nivel_1():
                 True, (255, 200, 100),
             )
             ventana.blit(txt, (20, y_orden))
- 
+        if cocina.tiempo <= 0:
+                # Pasamos las variables exactas de la ventana, los chefs de ese nivel y el tamaño
+                mostrar_pantalla_resultados(ventana, chef1, chef2, ANCHO, ALTO)
+                run = False
         pygame.display.update()
+ 
  
  
 # ─────────────────────────────────────────────
@@ -774,7 +825,11 @@ def pantalla_nivel_2():
                 True, (255, 200, 100),
             )
             ventana.blit(txt, (20, y_orden))
- 
+        if cocina.tiempo <= 0:
+                # Pasamos las variables exactas de la ventana, los chefs de ese nivel y el tamaño
+                mostrar_pantalla_resultados(ventana, chef1, chef2, ANCHO, ALTO)
+                run = False
+        
         pygame.display.update()
  
  
@@ -1146,6 +1201,12 @@ def pantalla_nivel_3():
                 True, (255, 200, 100),
             )
             ventana.blit(txt, (20, y_orden))
+        
+        if cocina.tiempo <= 0:
+                # Pasamos las variables exactas de la ventana, los chefs de ese nivel y el tamaño
+                mostrar_pantalla_resultados(ventana, chef1, chef2, ANCHO, ALTO)
+                run = False
+        
 
         pygame.display.update()
  
