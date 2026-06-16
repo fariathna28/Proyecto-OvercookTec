@@ -51,11 +51,38 @@ estaciones_tiles = {
         39: "mesa_plato_pan_carne_tomate_cruda",
         38: "mesa_plato_pan_carne_tomate_papa_cruda",
     },
+
+    "nivel3": {
+        3:  "estacion_papas",
+        4:  "tabla_picar",
+        5:  "estacion_tomates",
+        6:  "entrega",
+        9:  "freidor",
+        18: "estacion_carne",
+        27: "estacion_pan",
+        36: "estacion_platos",
+        45: "cocina",
+        0:  "mesa",
+        16: "mesa_Carne_cruda",
+        15: "mesa_Carne_cocinada_cruda",
+        25: "mesa_Tomate_cruda",
+        26: "mesa_Tomate_cut_cruda",
+        24: "mesa_Pan_cruda",
+        22: "mesa_Papa_cruda",
+        23: "mesa_Papa_cocinada_cruda",
+        34: "mesa_plato_pan_cruda",
+        35: "mesa_plato_papa_cruda",
+        41: "mesa_plato_pan_carne_cruda",
+        40: "mesa_plato_pan_carne2_cruda",
+        39: "mesa_plato_pan_carne_tomate_cruda",
+        38: "mesa_plato_pan_carne_tomate_papa_cruda",
+    }
 }
  
 obstaculos_tiles = {
     "nivel1": {0, 2, 3, 5, 6, 9, 15, 16, 23, 24},
-    "nivel2": {0, 3, 4, 5, 6, 9, 18, 27, 36, 45}
+    "nivel2": {0, 3, 4, 5, 6, 9, 18, 27, 36, 45},
+    "nivel3": {0, 2, 3, 4, 5, 6, 7, 9, 10, }
 }
  
  

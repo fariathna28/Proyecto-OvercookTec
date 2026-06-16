@@ -61,7 +61,8 @@ class Plato:
     # Orden fijo de ensamblado
     ORDEN_POR_NIVEL = {
     "nivel1": ["Alga", "Arroz", "Pepino", "Pescado_cocinado"],
-    "nivel2": ["Pan", "Carne", "Tomate", "Papa"]}
+    "nivel2": ["Pan", "Carne", "Tomate", "Papa"],
+    "nivel3": ["Arroz", "Frijoles", "Huevo", "Salchichon", "Platano"]}
     
     
     # Qué tile mostrar según contenido
@@ -358,6 +359,13 @@ class Cocina:
         ("Hamburguesa Simple",     [("PanesYBases", "Pan"), ("Proteina", "Carne")]),
         ("Hamburguesa con Tomate", [("PanesYBases", "Pan"), ("Proteina", "Carne"), ("VegetalesYFrutas", "Tomate")]),
         ("Hamburguesa Completa",   [("PanesYBases", "Pan"), ("Proteina", "Carne"), ("VegetalesYFrutas", "Tomate"), ("VegetalesYFrutas", "Papa")]),
+    ],
+    "nivel3": [
+        ("Arroz Blanco",    [("PanesYBases", "Arroz")]),
+        ("Gallo Pinto Simple",    [("PanesYBases", "Arroz"), ("PanesYBases", "Frijoles")]),
+        ("Gallo Pinto con Huevo", [("PanesYBases", "Arroz"), ("PanesYBases", "Frijoles"), ("Proteina", "Huevo")]),
+        ("Gallo Pinto con Huevo y Salchichón",  [("PanesYBases", "Arroz"), ("PanesYBases", "Frijoles"), ("Proteina", "Huevo"), ("Proteina", "Salchichon")]),
+        ("Gallo Pinto Completo",  [("PanesYBases", "Arroz"), ("PanesYBases", "Frijoles"), ("Proteina", "Huevo"), ("Proteina", "Salchichon"), ("VegetalesYFrutas", "Platano")])
     ]
     }
     TIPOS = {
