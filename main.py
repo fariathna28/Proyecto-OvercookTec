@@ -736,20 +736,357 @@ def pantalla_nivel_2():
         pygame.display.update()
  
  
-# ─────────────────────────────────────────────
-#  NIVEL 3 (pendiente)
-# ─────────────────────────────────────────────
+
+#  NIVEL 3
+
 def pantalla_nivel_3():
-    fondo = pygame.Surface((ANCHO, ALTO))
-    fondo.fill(Constantes.BLANCO)
-    while True:
-        ventana.blit(fondo, (0, 0))
-        for evento in pygame.event.get():
-            if evento.type == pygame.QUIT:
+    tile_list_nivel3 = []
+    for x in range(48):  
+        tile_image = pygame.image.load(f"cr_tiles/tile{x+1}.png")
+        tile_image = pygame.transform.scale(tile_image, size=(Constantes.TILE_SIZE, Constantes.TILE_SIZE))
+        tile_list_nivel3.append(tile_image)
+
+    world = Mundo()
+    world_data_nivel3 = [
+        [0,0,3,0,2,5,10,0],       
+        [38,1,1,0,1,1,1,0],
+        [4,1,1,0,0,1,42,0],
+        [0,1,1,1,1,1,1,0],
+        [0,7,0,9,0,6,0,0],
+    ]
+    world.process_data(world_data_nivel3, tile_list_nivel3, "nivel3")  
+
+    mesa_tiles3 = {
+
+        "Platano_crudo":24,
+        "Platano_cocinado":25,
+        "Huevo":27,
+        "Huevo_cocinado":26,
+        "Arroz":28,
+        "Frijoles":29,
+        "Salchichon_entero": 30,
+        "Salchichon_crudo":36,
+        "Salchichon_cocinado":35,
+        "Platano_entero":31,
+    }
+
+    cocina = Cocina(tiempo_total=120, nivel="nivel3")
+
+    chef1 = Chef(
+        nombre="Chef 1",
+        imagen_path="Imagenes/gato.png",
+        x=200, y=300,
+        teclas=(pygame.K_w, pygame.K_s, pygame.K_a, pygame.K_d, pygame.K_e),
+        velocidad=3,
+    )
+    chef2 = Chef(
+        nombre="Chef 2",
+        imagen_path="Imagenes/gato2.png",
+        x=400, y=300,
+        teclas=(pygame.K_UP, pygame.K_DOWN, pygame.K_LEFT, pygame.K_RIGHT, pygame.K_KP0),
+        velocidad=3,
+    )
+    cocina.agregar_chef(chef1)
+    cocina.agregar_chef(chef2)
+
+    procesando_estaciones = {}
+
+    TIEMPOS_PROCESO = {
+        "cocina": 5.0,
+        "freidor": 4.0,
+        "tabla_picar": 3.0,
+    }
+    TILE_OVERLAY_CRUDO = {
+        "cocina_Salchichon_cortado":15,
+        "cocina_Huevo": 19,
+        "freidor":16,
+        "tabla_picar_Salchichon":22,  
+        "tabla_picar_Platano":23,  
+    }
+    TILE_OVERLAY_LISTO = {
+        "cocina_Salchichon_cortado":14,
+        "cocina_Huevo": 18,
+        "freidor":17,
+        "tabla_picar_Salchichon":15,  
+        "tabla_picar_Platano":16,  
+    }
+    INGREDIENTE_RESULTADO = {
+        "cocina":  lambda: Proteina("Salchichon_cocinado"),
+        "freidor": lambda: VegetalesYFrutas("Platano_cocinado"),
+    }
+
+    def encontrar_estacion_cercana(chef):
+        centro_chef = pygame.Vector2(chef.rect.centerx, chef.rect.centery)
+        mejor_tipo  = None
+        menor_dist  = float("inf")
+        for estacion in world.estaciones_tiles:
+            if chef.rect.colliderect(estacion["rect"]):
+                centro_est = pygame.Vector2(estacion["rect"].centerx, estacion["rect"].centery)
+                dist = centro_chef.distance_to(centro_est)
+                if dist < menor_dist:
+                    menor_dist = dist
+                    mejor_tipo = estacion["tipo"]
+        return mejor_tipo
+
+    def pos_estacion(tipo_estacion):
+        for estacion in world.estaciones_tiles:
+            if estacion["tipo"] == tipo_estacion:
+                return (estacion["rect"].x, estacion["rect"].y)
+        return None
+
+    def nombre_tile_para_ingrediente(ing):
+        if isinstance(ing, Proteina):
+            if ing.nombre == "Huevo":
+                return "Huevo_cocinado" if ing.estado == "preparado" else "Huevo"
+            elif ing.nombre == "Huevo_cocinado":      
+                return "Huevo_cocinado"
+            elif ing.nombre == "Salchichon":
+                return "Salchichon_entero"
+            elif ing.nombre == "Salchichon_cortado":
+                return "Salchichon_crudo"          
+            elif ing.nombre == "Salchichon_cocinado":
+                return "Salchichon_cocinado"
+        elif isinstance(ing, VegetalesYFrutas) and ing.nombre == "Platano":
+            return "Platano_entero"
+        elif isinstance(ing, VegetalesYFrutas) and ing.nombre == "Platano_cortado":
+            return "Platano_crudo"                
+        elif isinstance(ing, VegetalesYFrutas) and ing.nombre == "Platano_cocinado":
+            return "Platano_cocinado"
+        elif isinstance(ing, PanesYBases):
+            if ing.nombre == "Arroz":
+                return "Arroz"
+            elif ing.nombre == "Frijoles":
+                return "Frijoles"
+        return None
+
+    fuente_hud = pygame.font.SysFont("Arial", 22)
+
+    run = True
+    while run:
+        delta = clock.tick(60) / 1000.0
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            if evento.type == pygame.KEYDOWN and evento.key == pygame.K_ESCAPE:
-                return
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    return
+
+                for chef in cocina.chefs:
+                    if event.key != chef.teclas[4]:
+                        continue
+
+                    tipo = encontrar_estacion_cercana(chef)
+                    print(f"Tipo detectado: {tipo}")
+
+                    if chef.ingrediente_mano is None:
+
+                        if tipo == "estacion_huevos":
+                            chef.ingrediente_mano = Proteina("Huevo")
+                        elif tipo == "estacion_arroz":
+                            chef.ingrediente_mano = PanesYBases("Arroz")
+                        elif tipo == "estacion_frijoles":
+                            chef.ingrediente_mano = PanesYBases("Frijoles")
+                        elif tipo == "estacion_salchichon":
+                            chef.ingrediente_mano = Proteina("Salchichon")
+                        elif tipo == "estacion_platano":
+                            chef.ingrediente_mano = VegetalesYFrutas("Platano")
+                        elif tipo == "estacion_platos":
+                            chef.ingrediente_mano = Plato(nivel="nivel3")
+
+                        elif tipo in ("cocina", "freidor"):
+                            if tipo in procesando_estaciones:
+                                datos = procesando_estaciones[tipo]
+                                if datos["listo"]:
+                                    nombre_ing = datos.get("ingrediente", "")
+                                    if nombre_ing == "Huevo":
+                                        ing = Proteina("Huevo_cocinado")
+                                    else:
+                                        ing = INGREDIENTE_RESULTADO[tipo]()
+                                    ing.estado = "preparado"
+                                    ing.tiempo_preparacion = ing.tiempo_minimo
+                                    chef.ingrediente_mano = ing
+                                    world.quitar_overlay(datos["pos"])
+                                    del procesando_estaciones[tipo]
+                                    
+                        elif tipo == "tabla_picar": 
+                            if "tabla_picar" in procesando_estaciones:
+                                datos = procesando_estaciones["tabla_picar"]
+                                if datos["listo"]:
+                                    nombre_ing = datos["ingrediente"]
+                                    if nombre_ing == "Salchichon":
+                                        ing = Proteina("Salchichon_cortado")
+                                    else:  # Platano
+                                        ing = VegetalesYFrutas("Platano_cortado")
+                                    ing.estado = "crudo"
+                                    ing.tiempo_preparacion = 0
+                                    chef.ingrediente_mano = ing
+                                    world.quitar_overlay(datos["pos"])
+                                    del procesando_estaciones["tabla_picar"]
+
+                        elif tipo in ("mesa", "mesa_Platano_crudo", "mesa_Platano_cocinado",
+                                      "mesa_Huevo", "mesa_Huevo_cocinado", "mesa_Arroz",
+                                      "mesa_Frijoles", "mesa_Salchichon", "mesa_Platano",
+                                      "mesa_Salchichon_cocinado", "mesa_Salchichon_crudo"):
+                            for tile_data in world.map_tiles:
+                                if tile_data[1].colliderect(chef.rect) and tile_data[5] is not None:
+                                    chef.ingrediente_mano = tile_data[5]
+                                    tile_data[5] = None
+                                    tile_data[0] = tile_list_nivel3[0]
+                                    tile_data[4] = 0
+                                    world.actualizar_estaciones("nivel3")
+                                    break
+
+                    elif isinstance(chef.ingrediente_mano, Ingrediente) \
+                            and not isinstance(chef.ingrediente_mano, Plato):
+                        ing = chef.ingrediente_mano
+
+                        if tipo == "tabla_picar" \
+                                and ing.nombre in ("Salchichon", "Platano") \
+                                and ing.estado != "preparado":
+                            if "tabla_picar" not in procesando_estaciones:
+                                pos = pos_estacion("tabla_picar")
+                                if pos:
+                                    clave_crudo = f"tabla_picar_{ing.nombre}"
+                                    world.poner_overlay(pos, tile_list_nivel3[TILE_OVERLAY_CRUDO[clave_crudo]])
+                                    procesando_estaciones["tabla_picar"] = {
+                                        "pos": pos,
+                                        "timer": 0.0,
+                                        "listo": False,
+                                        "ingrediente": ing.nombre,
+                                    }
+                                    chef.ingrediente_mano = None
+
+                        elif tipo == "cocina" and isinstance(ing, Proteina) and ing.nombre == "Salchichon_cortado":
+                            if "cocina" not in procesando_estaciones:
+                                pos = pos_estacion("cocina")
+                                if pos:
+                                    world.poner_overlay(pos, tile_list_nivel3[TILE_OVERLAY_CRUDO["cocina_Salchichon_cortado"]])
+                                    procesando_estaciones["cocina"] = {
+                                        "pos": pos, "timer": 0.0, "listo": False, "ingrediente": "Salchichon_cortado"}
+                                    chef.ingrediente_mano = None
+
+                        elif tipo == "cocina" and isinstance(ing, Proteina) and ing.nombre == "Huevo":
+                            if "cocina" not in procesando_estaciones:
+                                pos = pos_estacion("cocina")
+                                if pos:
+                                    world.poner_overlay(pos, tile_list_nivel3[TILE_OVERLAY_CRUDO["cocina_Huevo"]])
+                                    procesando_estaciones["cocina"] = {
+                                        "pos": pos, "timer": 0.0, "listo": False,
+                                        "ingrediente": "Huevo"}
+                                    chef.ingrediente_mano = None
+
+                        elif tipo == "freidor" and isinstance(ing, VegetalesYFrutas) and ing.nombre == "Platano_cortado":
+                            if "freidor" not in procesando_estaciones:
+                                pos = pos_estacion("freidor")
+                                if pos:
+                                    world.poner_overlay(pos, tile_list_nivel3[TILE_OVERLAY_CRUDO["freidor"]])
+                                    procesando_estaciones["freidor"] = {
+                                        "pos": pos, "timer": 0.0, "listo": False}
+                                    chef.ingrediente_mano = None
+
+                        elif tipo == "mesa":
+                            nombre_tile = nombre_tile_para_ingrediente(ing)
+                            if nombre_tile and nombre_tile in mesa_tiles3:
+                                for tile_data in world.map_tiles:
+                                    if tile_data[1].colliderect(chef.rect) and tile_data[4] == 0:
+                                        indice = mesa_tiles3[nombre_tile]
+                                        tile_data[0] = tile_list_nivel3[indice]
+                                        tile_data[4] = indice
+                                        tile_data[5] = ing
+                                        break
+                                world.actualizar_estaciones("nivel3")
+                            chef.ingrediente_mano = None
+
+                        elif tipo == "entrega":
+                            chef.ingrediente_mano = None
+
+                    elif isinstance(chef.ingrediente_mano, Plato):
+                        plato = chef.ingrediente_mano
+
+                        if tipo == "estacion_arroz":
+                            ing_arroz = PanesYBases("Arroz")
+                            if plato.puede_agregar(ing_arroz):
+                                plato.agregar(ing_arroz)
+
+                        elif tipo == "estacion_frijoles":
+                            ing_frijoles = PanesYBases("Frijoles")
+                            if plato.puede_agregar(ing_frijoles):
+                                plato.agregar(ing_frijoles)
+
+                        elif tipo in ("mesa", "mesa_Platano_crudo", "mesa_Platano_cocinado",
+                                      "mesa_Huevo", "mesa_Huevo_cocinado", "mesa_Arroz",
+                                      "mesa_Frijoles", "mesa_Salchichon", "mesa_Platano",
+                                      "mesa_Salchichon_cocinado", "mesa_Salchichon_crudo"):
+                            for tile_data in world.map_tiles:
+                                if tile_data[1].colliderect(chef.rect) and tile_data[5] is not None:
+                                    if plato.puede_agregar(tile_data[5]):
+                                        plato.agregar(tile_data[5])
+                                        tile_data[5] = None
+                                        tile_data[0] = tile_list_nivel3[0]
+                                        tile_data[4] = 0
+                                        world.actualizar_estaciones("nivel3")
+                                    break
+
+                        elif tipo == "entrega":
+                            puntos = 0
+                            for orden in cocina.ordenes:
+                                if orden.activa and orden.comparar_receta(plato):
+                                    puntos = orden.puntos_receta
+                                    orden.activa = False
+                                    break
+                            if puntos > 0:
+                                chef.puntos += puntos
+                            chef.ingrediente_mano = None
+
+        keys = pygame.key.get_pressed()
+        for chef in cocina.chefs:
+            chef.mover(keys, ANCHO, ALTO, world.obstaculos_tiles)
+
+        cocina.actualizar(delta)
+
+        for tipo_est, datos in list(procesando_estaciones.items()):
+            if not datos["listo"]:
+                datos["timer"] += delta
+                if datos["timer"] >= TIEMPOS_PROCESO[tipo_est]:
+                    datos["listo"] = True
+                    if tipo_est == "tabla_picar":
+                        clave = f"tabla_picar_{datos['ingrediente']}"
+                        idx = TILE_OVERLAY_LISTO.get(clave, 0)
+                    elif tipo_est == "cocina": 
+                        clave = f"cocina_{datos.get('ingrediente', '')}"
+                        idx = TILE_OVERLAY_LISTO.get(clave, 0)
+                    else:
+                        idx = TILE_OVERLAY_LISTO[tipo_est]
+                    world.poner_overlay(datos["pos"], tile_list_nivel3[idx])
+
+        if cocina.tiempo <= 0:
+            run = False
+
+        ventana.fill((30, 30, 30))
+        dibujar_grid()
+        world.draw(ventana)
+        cocina.dibujar(ventana)
+
+        tiempo_txt = fuente_hud.render(f"Tiempo: {max(0, int(cocina.tiempo))}s", True, (255, 255, 255))
+        pts1_txt   = fuente_hud.render(f"Chef 1: {chef1.puntos} pts", True, (200, 230, 255))
+        pts2_txt   = fuente_hud.render(f"Chef 2: {chef2.puntos} pts", True, (255, 230, 180))
+        ventana.blit(tiempo_txt, (20, 20))
+        ventana.blit(pts1_txt,   (20, 50))
+        ventana.blit(pts2_txt,   (20, 75))
+
+        y_orden = 105
+        ventana.blit(fuente_hud.render("Recetas", True, (255, 255, 100)), (20, y_orden))
+        for orden in cocina.ordenes:
+            y_orden += 22
+            txt = fuente_hud.render(
+                f"  {orden.nombre}  {orden.puntos_receta}pts"
+                f"  {int(orden.max_time_receta - orden.tiempo_transcurrido)}s",
+                True, (255, 200, 100),
+            )
+            ventana.blit(txt, (20, y_orden))
+
         pygame.display.update()
  
  

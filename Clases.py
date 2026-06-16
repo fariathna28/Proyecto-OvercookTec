@@ -50,10 +50,9 @@ class Proteina(Ingrediente):
     def actualizar_estado(self, delta):
         if self.estado in ("crudo", "preparado"):
             self.tiempo_preparacion += delta
-            if self.tiempo_preparacion >= self.tiempo_maximo:   # corregido: era MAX_TIEMPO
-                self.estado = "quemado"
+            if self.tiempo_preparacion >= self.tiempo_maximo:   
                 self.cocinada = False
-            elif self.tiempo_preparacion >= self.tiempo_minimo: # corregido: era MIN_TIEMPO
+            elif self.tiempo_preparacion >= self.tiempo_minimo: 
                 self.estado = "preparado"
                 self.cocinada = True
 
@@ -72,11 +71,18 @@ class Plato:
         ("Pan", "Carne"): 41,
         ("Pan", "Carne", "Tomate"): 39,
         ("Pan", "Carne", "Tomate", "Papa"): 38,
+
         ("Alga",): 24,
         ("Alga", "Arroz"): 30,
         ("Alga", "Arroz", "Pepino"): 29,
         ("Alga", "Arroz", "Pepino", "Pescado_cocinado"): 32,
         ("Alga", "Arroz", "Pepino", "Pescado_cocinado", "tempura"): 31,
+
+        ("Arroz",): 39,           # ← pon el número de tile correcto
+        ("Arroz", "Frijoles"): 32,
+        ("Arroz", "Frijoles", "Huevo"): 33,
+        ("Arroz", "Frijoles", "Huevo", "Salchichon"): 34,
+        ("Arroz", "Frijoles", "Huevo", "Salchichon", "Platano"): 37,
     }
 
 
@@ -260,6 +266,24 @@ class Chef:
             "plato_pan_carne": pygame.transform.scale(pygame.image.load("tileset/tile30.png"), (40, 40)),
             "plato_pan_carne_tomate": pygame.transform.scale(pygame.image.load("tileset/tile32.png"), (40, 40)),
             "plato_pan_carne_tomate_papa": pygame.transform.scale(pygame.image.load("tileset/tile33.png"), (40, 40)),
+            #Nivel3
+            "Huevo": pygame.transform.scale(pygame.image.load("cr_tiles/tile20.png"), (40, 40)),
+            "Huevo_cocinado": pygame.transform.scale(pygame.image.load("cr_tiles/tile19.png"), (40, 40)),
+            "Salchichon_entero": pygame.transform.scale(pygame.image.load("cr_tiles/tile23.png"), (40, 40)),
+            "Salchichon_crudo": pygame.transform.scale(pygame.image.load("cr_tiles/tile16.png"), (40, 40)),
+            "Salchichon_cocinado": pygame.transform.scale(pygame.image.load("cr_tiles/tile15.png"), (40, 40)),
+            "Platano_entero": pygame.transform.scale(pygame.image.load("cr_tiles/tile24.png"), (40, 40)),
+            "Platano_crudo": pygame.transform.scale(pygame.image.load("cr_tiles/tile17.png"), (40, 40)),
+            "Platano_cocinado": pygame.transform.scale(pygame.image.load("cr_tiles/tile18.png"), (40, 40)),
+            "Arroz": pygame.transform.scale(pygame.image.load("cr_tiles/tile21.png"), (40, 40)),
+            "Frijoles": pygame.transform.scale(pygame.image.load("cr_tiles/tile22.png"), (40, 40)),
+            # Platos nivel 3
+            "plato_vacio_cr": pygame.transform.scale(pygame.image.load("cr_tiles/tile42.png"), (40, 40)),
+            "plato_arroz": pygame.transform.scale(pygame.image.load("cr_tiles/tile41.png"), (40, 40)),
+            "plato_arroz_frijoles": pygame.transform.scale(pygame.image.load("cr_tiles/tile12.png"), (40, 40)),
+            "plato_arroz_frijoles_huevo": pygame.transform.scale(pygame.image.load("cr_tiles/tile13.png"), (40, 40)),
+            "plato_arroz_frijoles_huevo_salchichon": pygame.transform.scale(pygame.image.load("cr_tiles/tile14.png"), (40, 40)),
+            "plato_completo_cr": pygame.transform.scale(pygame.image.load("cr_tiles/tile9.png"), (40, 40)),
 
         }   
 
@@ -329,16 +353,30 @@ class Chef:
                 ("Alga", "Arroz"): "plato_alga_arroz",
                 ("Alga", "Arroz", "Pepino"): "plato_alga,arroz,pepino",
                 ("Alga", "Arroz", "Pepino", "Pescado_cocinado"): "plato_alga,arroz,pepino,pescado",
+            
+                ("Arroz",): "plato_arroz",
+                ("Arroz", "Frijoles"): "plato_arroz_frijoles",
+                ("Arroz", "Frijoles", "Huevo"): "plato_arroz_frijoles_huevo",
+                ("Arroz", "Frijoles", "Huevo", "Salchichon"): "plato_arroz_frijoles_huevo_salchichon",
+                ("Arroz", "Frijoles", "Huevo", "Salchichon", "Platano"): "plato_completo_cr",
             }
             nombre_img = nombres_clave.get(clave, "plato_vacio")
             img = self.ingredientes_tiles.get(nombre_img)
             if img:
                 ventana.blit(img, (self.x + 40, self.y - 10))
         else:
-                nombre = self.ingrediente_mano.nombre
-                if nombre in self.ingredientes_tiles:
-                    img = self.ingredientes_tiles[nombre]
-                    ventana.blit(img, (self.x + 40, self.y - 10))
+            nombre = self.ingrediente_mano.nombre
+            if nombre == "Salchichon":
+                nombre = "Salchichon_entero" 
+            elif nombre == "Salchichon_cortado":
+                nombre = "Salchichon_crudo" 
+            elif nombre == "Platano":
+                nombre = "Platano_entero"
+            elif nombre == "Platano_cortado":
+                nombre = "Platano_crudo"
+            if nombre in self.ingredientes_tiles:
+                img = self.ingredientes_tiles[nombre]
+                ventana.blit(img, (self.x + 40, self.y - 10))
 
     def __str__(self):
         return f"Chef: {self.nombre} | Pts: {self.puntos}"
