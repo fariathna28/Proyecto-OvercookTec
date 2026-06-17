@@ -533,14 +533,14 @@ def pantalla_nivel_2():
         "freidor":     est_freidor,
     }
     TILE_OVERLAY_CRUDO = {
-        "cocina":      16,
-        "tabla_picar": 25,
-        "freidor":     22,
+        "cocina":      12,
+        "tabla_picar": 20,
+        "freidor":     14,
     }
     TILE_OVERLAY_LISTO = {
-        "cocina":      15,
-        "tabla_picar": 26,
-        "freidor":     23,
+        "cocina":      11,
+        "tabla_picar": 21,
+        "freidor":     13,
     }
     INGREDIENTE_RESULTADO = {
         "cocina":      lambda: Proteina("Carne"),
@@ -863,14 +863,14 @@ def pantalla_nivel_3():
     TILE_OVERLAY_CRUDO = {
         "cocina_Salchichon_cortado":16,
         "cocina_Huevo": 21,
-        "freidor":10,
+        "freidor":18,
         "tabla_picar_Salchichon":24,  
         "tabla_picar_Platano":25,  
     }
     TILE_OVERLAY_LISTO = {
-        "cocina_Salchichon_cortado":16,
+        "cocina_Salchichon_cortado":15,
         "cocina_Huevo": 20,
-        "freidor":10,
+        "freidor":19,
         "tabla_picar_Salchichon":16,  
         "tabla_picar_Platano":18,  
     }

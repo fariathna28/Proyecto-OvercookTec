@@ -1,5 +1,5 @@
 import pygame
-
+import random
 
 # ─────────────────────────────────────────────
 #  INGREDIENTE (clase base)
@@ -452,6 +452,11 @@ class Cocina:
         self.intervalo_receta = 30
         self.tiempo_ultima_receta = 0
 
+        for _ in range(1):
+            nueva = self.generar_receta()
+            if nueva:
+                self.ordenes.append(nueva)
+
     def agregar_chef(self, chef):
         self.chefs.append(chef)
 
@@ -459,7 +464,6 @@ class Cocina:
         self.estaciones.append(estacion)
 
     def generar_receta(self):
-        import random
         opciones = self.RECETAS_DISPONIBLES.get(self.nivel, [])
         if not opciones:
             return None
