@@ -162,37 +162,66 @@ class Receta:
 #  ESTACION
 # ─────────────────────────────────────────────
 class Estacion:
+    TIEMPO_PROCESO = 0.0
+    TIEMPO_QUEMADO = 0.0 
+
     def __init__(self, nombre, ingredientes_aceptados=None):
         self.nombre = nombre
         self.ingredientes_aceptados = ingredientes_aceptados or []
-        self.ingrediente_actual = None
+        self.timer = 0.0
+        self.timer_quemado = 0.0
+        self.listo = False
         self.procesando = False
+        self.quemado = False
+        self.pos = None
+        self.ingrediente = None
 
-    def aceptar_ingrediente(self, ingrediente):
-        tipo = type(ingrediente).__name__
-        if tipo in self.ingredientes_aceptados and self.ingrediente_actual is None:
-            self.ingrediente_actual = ingrediente
-            self.procesando = True
-            return True
-        return False
+    def iniciar(self, pos, ingrediente=None):
+        self.timer = 0.0
+        self.timer_quemado = 0.0
+        self.listo = False
+        self.quemado = False
+        self.procesando = True
+        self.pos = pos
+        self.ingrediente = ingrediente
 
     def actualizar(self, delta):
-        if self.procesando and self.ingrediente_actual:
-            self.ingrediente_actual.actualizar_estado(delta)
-            if self.ingrediente_actual.estado in ("preparado", "quemado"):
+        if self.procesando and not self.listo:
+            self.timer += delta
+            if self.timer >= self.TIEMPO_PROCESO:
+                self.listo = True
                 self.procesando = False
+        elif self.listo and self.TIEMPO_QUEMADO > 0:
+            self.timer_quemado += delta
+            if self.timer_quemado >= self.TIEMPO_QUEMADO:
+                self.quemado = True
 
-    def retirar_ingrediente(self):
-        ing = self.ingrediente_actual
-        self.ingrediente_actual = None
+    def reiniciar(self):
+        self.timer = 0.0
+        self.timer_quemado = 0.0
+        self.listo = False
+        self.quemado = False
         self.procesando = False
-        return ing
-
-    def generar_receta(self):
-        return None
+        self.pos = None
+        self.ingrediente = None
 
     def __str__(self):
         return f"Estación: {self.nombre}"
+
+
+class TablaPicar(Estacion):
+    TIEMPO_PROCESO = 3.0
+    TIEMPO_QUEMADO = 0.0 
+
+
+class EstacionCocina(Estacion):
+    TIEMPO_PROCESO = 5.0
+    TIEMPO_QUEMADO = 8.0 
+
+
+class Freidor(Estacion):
+    TIEMPO_PROCESO = 4.0
+    TIEMPO_QUEMADO = 8.0
 
 
 class EstacionDespensa(Estacion):
