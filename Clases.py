@@ -29,9 +29,6 @@ class PanesYBases(Ingrediente):
 class Proteina(Ingrediente):
     tiempo_minimo = 5
     tiempo_maximo = 15   
-    def __init__(self, nombre):
-            super().__init__(nombre)
-            self.tiempo_maximo = 15
 
     def actualizar_estado(self, delta):
         if self.estado in ("crudo", "preparado"):
@@ -200,15 +197,6 @@ class Freidor(Estacion):
     TIEMPO_PROCESO = 4.0
     TIEMPO_QUEMADO = 8.0
 
-
-class EstacionDespensa(Estacion):
-    def __init__(self, nombre, ingrediente_clase, nombre_ingrediente):
-        super().__init__(nombre)
-        self.ingrediente_clase = ingrediente_clase
-        self.nombre_ingrediente = nombre_ingrediente
-
-    def entregar_ingrediente(self):
-        return self.ingrediente_clase(self.nombre_ingrediente)
 
 
 class EstacionEntrega(Estacion):
