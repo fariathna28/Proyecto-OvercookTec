@@ -823,17 +823,16 @@ def pantalla_nivel_3():
     ]
     world.process_data(world_data_nivel3, tile_list_nivel3, "nivel3")  
 
-    mesa_tiles3 = {
-
+    mesa_tiles3 = {  
         "Platano_crudo":27,
         "Platano_cocinado":28,
         "Huevo":30,
         "Huevo_cocinado":29,
-        "Arroz":28,
+        "Arroz":31,
         "Frijoles":32,
         "Salchichon_entero": 33,
         "Salchichon_crudo":40,
-        "Salchichon_cocinado":41,
+        "Salchichon_cocinado":39,
         "Platano_entero":34,
     }
 
