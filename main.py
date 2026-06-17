@@ -9,8 +9,7 @@ import Constantes
 from Clases import TablaPicar, EstacionCocina, Freidor
 from mundo import Mundo
 from Clases import (
-    Chef, Cocina, Ingrediente,
-    EstacionDespensa, EstacionEntrega, Estacion,
+    Chef, Cocina, Ingrediente, EstacionEntrega, Estacion,
     Proteina, VegetalesYFrutas, PanesYBases, Plato
 )
  
