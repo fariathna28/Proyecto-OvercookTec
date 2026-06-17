@@ -12,15 +12,6 @@ class Ingrediente:
         self.estado = "crudo"
         self.tiempo_preparacion = 0
 
-    def actualizar_estado(self, delta):
-        if self.estado == "crudo":
-            self.tiempo_preparacion += delta
-            if self.tiempo_preparacion >= self.tiempo_minimo:
-                self.estado = "preparado"
-
-    def mostrar(self):
-        print(f"{self.nombre} [{self.estado}]")
-
 
 # ─────────────────────────────────────────────
 #  SUBCLASES DE INGREDIENTE
@@ -28,24 +19,18 @@ class Ingrediente:
 class VegetalesYFrutas(Ingrediente):
     tiempo_minimo = 3
 
-    def actualizar_estado(self, delta):
-        super().actualizar_estado(delta)
-
 
 class PanesYBases(Ingrediente):
-
     def __init__(self, nombre):
         super().__init__(nombre)
-        self.estado = "preparado"   # listos desde la despensa, no necesitan preparación
+        self.estado = "preparado"  
 
 
 class Proteina(Ingrediente):
     tiempo_minimo = 5
-    tiempo_maximo = 15              # si se supera → quemado
-
+    tiempo_maximo = 15   
     def __init__(self, nombre):
             super().__init__(nombre)
-            self.cocinada = False
             self.tiempo_maximo = 15
 
     def actualizar_estado(self, delta):
@@ -91,15 +76,7 @@ class Plato:
     def __init__(self, nivel="nivel2"):
         self.nombre = "Plato"
         self.ingredientes = []
-        self.es_tempura = False
         self.orden = self.ORDEN_POR_NIVEL[nivel]
-
-
-    def tile_actual(self):
-        if getattr(self, "es_tempura", False):
-            return 31  # tile sushi tempura
-        clave = tuple(i.nombre for i in self.ingredientes)
-        return self.TILE_POR_CONTENIDO.get(clave, 10)
 
     def puede_agregar(self, ingrediente):
         if ingrediente.estado != "preparado":

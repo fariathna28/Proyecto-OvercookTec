@@ -400,7 +400,7 @@ def pantalla_nivel_1():
                             else:
                                 # REGLA 2: Receta incorrecta -> Restar puntos al chef actual
                                 # Definimos una penalización fija (ej: 50 pts) y controlamos el mínimo en 0
-                                penalizacion_error = 50 
+                                penalizacion_error = 10 
                                 chef.puntos = max(0, chef.puntos - penalizacion_error)
                                 print(f"¡Plato Incorrecto! Chef pierde -{penalizacion_error} puntos.")
                             
@@ -735,13 +735,21 @@ def pantalla_nivel_2():
  
                         elif tipo == "entrega":
                             puntos = 0
+                            receta_correcta = False
+    
                             for orden in cocina.ordenes:
                                 if orden.activa and orden.comparar_receta(plato):
                                     puntos = orden.puntos_receta
                                     orden.activa = False
+                                    receta_correcta = True
                                     break
-                            if puntos > 0:
+    
+                            if receta_correcta:
                                 chef.puntos += puntos
+                            else:
+                                penalizacion_error = 10          # ← PENALIZACIÓN
+                                chef.puntos = max(0, chef.puntos - penalizacion_error)
+                            
                             chef.ingrediente_mano = None
  
         keys = pygame.key.get_pressed()
@@ -1083,13 +1091,21 @@ def pantalla_nivel_3():
 
                         elif tipo == "entrega":
                             puntos = 0
+                            receta_correcta = False
+    
                             for orden in cocina.ordenes:
                                 if orden.activa and orden.comparar_receta(plato):
                                     puntos = orden.puntos_receta
                                     orden.activa = False
+                                    receta_correcta = True
                                     break
-                            if puntos > 0:
+                            
+                            if receta_correcta:
                                 chef.puntos += puntos
+                            else:
+                                penalizacion_error = 50          # ← PENALIZACIÓN
+                                chef.puntos = max(0, chef.puntos - penalizacion_error)
+                            
                             chef.ingrediente_mano = None
 
         keys = pygame.key.get_pressed()
