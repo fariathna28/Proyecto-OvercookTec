@@ -1092,7 +1092,8 @@ def pantalla_nivel_3():
                         elif tipo == "entrega":
                             puntos = 0
                             receta_correcta = False
-    
+                            
+                            # Buscar si el plato coincide con alguna orden activa en pantalla
                             for orden in cocina.ordenes:
                                 if orden.activa and orden.comparar_receta(plato):
                                     puntos = orden.puntos_receta
@@ -1101,11 +1102,17 @@ def pantalla_nivel_3():
                                     break
                             
                             if receta_correcta:
+                                # Si es correcta, suma los puntos ganados al chef actual
                                 chef.puntos += puntos
+                                print(f"¡Entrega Exitosa! +{puntos} puntos.")
                             else:
-                                penalizacion_error = 50          # ← PENALIZACIÓN
+                                # Si es incorrecta, se le restan 50 puntos fijos al chef actual
+                                # max(0, ...) asegura el control de puntaje mínimo en cero
+                                penalizacion_error = 50 
                                 chef.puntos = max(0, chef.puntos - penalizacion_error)
+                                print(f"¡Plato Incorrecto! El chef pierde -{penalizacion_error} puntos.")
                             
+                            # Al terminar la acción, se vacía la mano del chef
                             chef.ingrediente_mano = None
 
         keys = pygame.key.get_pressed()
