@@ -120,6 +120,8 @@ class Receta:
             self.puntos_receta //= 2
             if self.puntos_receta <= 0:
                 self.activa = False
+            return True  
+        return False
 
     def comparar_receta(self, plato):
         # plato es un objeto Plato con lista de ingredientes ensamblados
@@ -433,29 +435,26 @@ class Cocina:
         return Receta(nombre, ingredientes)
 
     def actualizar(self, delta):
-            self.tiempo -= delta
+        self.tiempo -= delta
 
-            # Generar receta nueva a intervalos
-            self.tiempo_ultima_receta += delta
-            if self.tiempo_ultima_receta >= self.intervalo_receta and self.tiempo > 0:
-                nueva = self.generar_receta()
-                if nueva:
-                    self.ordenes.append(nueva)
-                self.tiempo_ultima_receta = 0
+        self.tiempo_ultima_receta += delta
+        if self.tiempo_ultima_receta >= self.intervalo_receta and self.tiempo > 0:
+            nueva = self.generar_receta()
+            if nueva:
+                self.ordenes.append(nueva)
+            self.tiempo_ultima_receta = 0
 
+        for orden in self.ordenes:
+            if not orden.activa:
+                continue
+            venció = orden.actualizar(delta)   # ahora actualizar() devuelve True si expiró este frame
+            if venció:
+                penalizacion = 10  # o el valor fijo que quieras, ya que orden.puntos_receta puede ya estar reducido
+                for chef in self.chefs:
+                    chef.puntos = max(0, chef.puntos - penalizacion)
+                print(f"¡Receta expirada! Penalización de -{penalizacion} pts a los chefs.")
 
-            for orden in self.ordenes:
-                estado_anterior = orden.activa 
-                orden.actualizar(delta)
-
-                if estado_anterior and not orden.activa:
-                    penalizacion = orden.puntos_receta
-                    for chef in self.chefs:
-                        chef.puntos = max(0, chef.puntos - penalizacion)
-                    print(f"¡Receta expirada! Penalización de -{penalizacion} pts a los chefs.")
-
-            # Limpiar recetas vencidas
-            self.ordenes = [o for o in self.ordenes if o.activa]
+        self.ordenes = [o for o in self.ordenes if o.activa]
 
     def dibujar(self, ventana):
         for chef in self.chefs:
